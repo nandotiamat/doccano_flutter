@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
-import 'package:doccano_flutter/src/utils/utilities.dart';
+import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:flutter/material.dart';
 import 'package:doccano_flutter/globals.dart';
 
