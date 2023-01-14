@@ -1,56 +1,41 @@
-import 'package:dio/dio.dart';
-import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
-import 'package:doccano_flutter/error_page.dart';
+import 'package:doccano_flutter/constants/routes.dart';
+import 'package:doccano_flutter/get_started_page.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/homepage.dart';
-import 'package:doccano_flutter/test.dart';
-import 'package:doccano_flutter/utils/api.dart';
+import 'package:doccano_flutter/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   initGlobals();
-  runApp(const MyApp());
+  runApp(const DoccanoFlutter());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class DoccanoFlutter extends StatefulWidget {
+  const DoccanoFlutter({super.key});
 
+  @override
+  State<DoccanoFlutter> createState() => _DoccanoFlutterState();
+}
+
+class _DoccanoFlutterState extends State<DoccanoFlutter> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Doccano Futter',
+      initialRoute: getStartedRoute,
+      routes: {
+        getStartedRoute: (context) => const GetStartedPage(),
+        loginRoute: (context) => const LoginPage(),
+        homePageRoute: (context) => const Homepage(),
+      },
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Doccano Flutter'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: FutureBuilder(
-        future: login(),
-        builder: (context, snapshot) => snapshot.hasData
-            ? const Homepage()
-            : const Center(child: CircularProgressIndicatorWithText("LOGGING USER...")),
-      ),
+      home: const GetStartedPage(),
     );
   }
 }
