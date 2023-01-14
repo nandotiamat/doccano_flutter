@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
+import 'package:doccano_flutter/error_page.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/homepage.dart';
+import 'package:doccano_flutter/test.dart';
+import 'package:doccano_flutter/utils/api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -9,29 +12,6 @@ Future main() async {
   await dotenv.load(fileName: ".env");
   initGlobals();
   runApp(const MyApp());
-}
-
-Future<dynamic> getHttp() async {
-  try {
-    // AUTH LOGIN
-    var data = {"username": dotenv.get("USERNAME"), "password": dotenv.get("PASSWORD")};
-    
-    var response = await dio.post("$doccanoWS/v1/auth/login/", data: data);
-    
-    if (response.statusCode == 200) {
-      key = response.data["key"];
-    }
-    
-    var options =
-        Options(headers: {'Authorization': 'Token $key'});
-
-    response = await dio.get("$doccanoWS/v1/projects/$projectID",
-        options: options);
-    return response;
-  } catch (e) {
-    //TODO RETURN ERROR
-  }
-  return "NO DATA";
 }
 
 class MyApp extends StatelessWidget {
@@ -66,7 +46,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: FutureBuilder(
-        future: getHttp(),
+        future: login(),
         builder: (context, snapshot) => snapshot.hasData
             ? const Homepage()
             : const Center(child: CircularProgressIndicatorWithText("LOGGING USER...")),
