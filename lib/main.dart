@@ -1,7 +1,6 @@
 import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/get_started_page.dart';
 import 'package:doccano_flutter/globals.dart';
-// ignore: unused_import
 import 'package:doccano_flutter/homepage.dart';
 import 'package:doccano_flutter/login_page.dart';
 import 'package:flutter/material.dart';
@@ -40,31 +39,3 @@ class _DoccanoFlutterState extends State<DoccanoFlutter> {
     );
   }
 }
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
-        body: const Text(''));
-  }
-}
-
-/*FutureBuilder(
-        future: getHttp(),
-        builder: (context, snapshot) => snapshot.hasData
-            ? const GetStartedPage()
-            : const Center(
-                child: CircularProgressIndicatorWithText("LOGGING USER...")),
-      ),
-*/

@@ -5,6 +5,7 @@ late Dio dio;
 late String key;
 late String projectID;
 late String doccanoWS;
+late Options options;
 
 void initGlobals() async {
   projectID = dotenv.get("PROJECT_ID");
