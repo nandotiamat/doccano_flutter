@@ -1,11 +1,10 @@
-import 'package:dio/dio.dart';
 import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/components/labels_wrap.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
-import 'package:doccano_flutter/globals.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:selectable/selectable.dart';
 import 'package:float_column/float_column.dart';
 
@@ -19,8 +18,12 @@ class Homepage extends StatefulWidget {
 class _HomepageState extends State<Homepage> {
   List<InlineSpan>? _spans;
   late Future<Map<String, dynamic>> _future;
+  Label? selectedLabel;
 
   Future<Map<String, dynamic>> getData() async {
+    if (dotenv.get("ENV") == "development") {
+      await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
+    }
     List<Label?>? labels = await getLabels();
     List<Example?>? examples = await getExamples();
     Map<String, dynamic> data = {"examples": examples, "labels": labels};
@@ -36,6 +39,13 @@ class _HomepageState extends State<Homepage> {
   void initState() {
     super.initState();
     _future = getData();
+  }
+
+  void updateSelectedLabel(Label selectedLabel) {
+    debugPrint("Ho selezionato ${selectedLabel.text}");
+    setState(() {
+      this.selectedLabel = selectedLabel;
+    });
   }
 
   @override
@@ -188,7 +198,7 @@ class _HomepageState extends State<Homepage> {
                   //   ),
                   // ),
                   Expanded(
-                    child: LabelsWrap(labels: labels),
+                    child: LabelsWrap(labels, updateSelectedLabel),
                   ),
                 ],
               ),

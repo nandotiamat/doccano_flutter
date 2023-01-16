@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
+import 'package:flutter/rendering.dart';
 
 Future<bool> login(String username, String password) async {
   var dataLogin = {"username": username, "password": password};
@@ -14,6 +15,7 @@ Future<bool> login(String username, String password) async {
   if (response.statusCode == 200) {
     key = response.data["key"];
     options = Options(headers: {'Authorization': 'Token $key'});
+    debugPrint("User Logged");
     return true;
   }
 

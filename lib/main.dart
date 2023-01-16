@@ -3,7 +3,6 @@ import 'package:doccano_flutter/get_started_page.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/homepage.dart';
 import 'package:doccano_flutter/login_page.dart';
-import 'package:doccano_flutter/validation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -22,12 +21,18 @@ class DoccanoFlutter extends StatefulWidget {
 }
 
 class _DoccanoFlutterState extends State<DoccanoFlutter> {
+  
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Doccano Futter',
-      initialRoute: getStartedRoute,
+      initialRoute: dotenv.get("ENV") == "development" ? homePageRoute : getStartedRoute,
       routes: {
         getStartedRoute: (context) => const GetStartedPage(),
         loginRoute: (context) => const LoginPage(),
@@ -35,8 +40,7 @@ class _DoccanoFlutterState extends State<DoccanoFlutter> {
       },
       theme: ThemeData(
         primarySwatch: Colors.blue,
-      ),
-      home: const GetStartedPage(),
+      )
     );
   }
 }
