@@ -3,6 +3,7 @@ import 'package:doccano_flutter/get_started_page.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/homepage.dart';
 import 'package:doccano_flutter/login_page.dart';
+import 'package:doccano_flutter/validation_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 

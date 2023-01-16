@@ -3,6 +3,7 @@ import 'package:doccano_flutter/components/circular_progress_indicator_with_text
 import 'package:doccano_flutter/components/labels_wrap.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
+import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:selectable/selectable.dart';
@@ -16,41 +17,25 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  Future<Map<String, dynamic>> getLabels() async {
-    var options = Options(headers: {'Authorization': 'Token $key'});
+  List<InlineSpan>? _spans;
+  late Future<Map<String, dynamic>> _future;
 
-    var response = await dio.get("$doccanoWS/v1/projects/$projectID/span-types",
-        options: options);
-
-    List<Label> labels = [];
-    response.data.forEach((label) => labels.add(Label.fromJson(label)));
-
-    // ARBITRARIO
-    Map<String, dynamic> params = {"limit": 100};
-
-    response = await dio.get("$doccanoWS/v1/projects/$projectID/examples",
-        options: options, queryParameters: params);
-
-    List<Example> examples = [];
-    response.data["results"]
-        .forEach((example) => examples.add(Example.fromJson(example)));
-
+  Future<Map<String, dynamic>> getData() async {
+    List<Label?>? labels = await getLabels();
+    List<Example?>? examples = await getExamples();
     Map<String, dynamic> data = {"examples": examples, "labels": labels};
-    // print(data);
 
     setState(() {
       _spans = [TextSpan(text: data["examples"][0].text!)];
     });
+
     return data;
   }
-
-  List<InlineSpan>? _spans;
-  late Future<Map<String, dynamic>> _future;
 
   @override
   void initState() {
     super.initState();
-    _future = getLabels();
+    _future = getData();
   }
 
   @override
