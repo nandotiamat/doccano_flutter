@@ -19,10 +19,15 @@ class LabelsWrap extends StatelessWidget {
           .map(
             (label) => Chip(
               labelStyle: TextStyle(
-                  color: Color(hexStringToInt(label.textColor!))),
-              backgroundColor:
-                  Color(hexStringToInt(label.backgroundColor!)),
-              label: Text(label.text!),
+                color: Color(hexStringToInt(label.textColor!)),
+              ),
+              backgroundColor: Color(hexStringToInt(label.backgroundColor!)),
+              label: Text(
+                label.text!,
+                style: const TextStyle(
+                  fontSize: 15,
+                ),
+              ),
             ),
           )
           .toList()

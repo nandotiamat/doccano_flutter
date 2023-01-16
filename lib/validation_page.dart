@@ -1,141 +1,183 @@
 import 'package:dio/dio.dart';
-import 'package:doccano_flutter/globals.dart';
-import 'package:doccano_flutter/utils/utilities.dart';
+import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
+import 'package:doccano_flutter/models/examples.dart';
+import 'package:doccano_flutter/models/label.dart';
+import 'package:doccano_flutter/single_example_page.dart';
 import 'package:flutter/material.dart';
-import 'package:selectable/selectable.dart';
-import 'components/circular_progress_indicator_with_text.dart';
-import 'models/examples.dart';
-import 'models/label.dart';
-import 'package:float_column/float_column.dart';
+import 'package:doccano_flutter/globals.dart';
 
 class ValidationPage extends StatefulWidget {
   const ValidationPage({super.key});
 
   @override
-  State<ValidationPage> createState() => _ValidationPageState();
+  State<ValidationPage> createState() => _ValidationPage();
 }
 
-class _ValidationPageState extends State<ValidationPage> {
-  Future<dynamic> getLabels() async {
-    var options = Options(headers: {'Authorization': 'Token $key'});
+class _ValidationPage extends State<ValidationPage> {
+  Future<Map<String, dynamic>> getLabels() async {
+    //var options = Options(headers: {'Authorization': 'Token $key'});
 
-    var response = await dio.get("$doccanoWS/v1/projects/$projectID/span-types",
-        options: options);
+    Response response;
 
     List<Label> labels = [];
-    response.data.forEach((label) => labels.add(Label.fromJson(label)));
 
     // ARBITRARIO
-    Map<String, dynamic> params = {"confirmed": true};
+    Map<String, dynamic> params = {"confirmed": false};
 
     response = await dio.get("$doccanoWS/v1/projects/$projectID/examples",
         options: options, queryParameters: params);
 
-    List<Example> confirmedExamples = [];
+    List<Example> examples = [];
     response.data["results"]
-        .forEach((example) => confirmedExamples.add(Example.fromJson(example)));
+        .forEach((example) => examples.add(Example.fromJson(example)));
 
-    Map<String, dynamic> data = {
-      "examples": confirmedExamples,
-      "labels": labels
-    };
-    // print(data);
+    Map<String, dynamic> data = {"examples": examples, "labels": labels};
+
     return data;
+  }
+
+  late Future<Map<String, dynamic>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = getLabels();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: getLabels(),
+        future: _future,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            List<Example> confirmedExamples = snapshot.data["examples"];
-            List<Label> labels = snapshot.data["labels"];
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(8.0),
-                    itemCount: confirmedExamples.length,
-                    itemBuilder: (context, index) {
-                      List<InlineSpan> spans = [
-                        TextSpan(
-                          text: confirmedExamples[index].text!,
-                        )
-                      ];
+            //print(snapshot.data);
+            List<Example> examples = snapshot.data!["examples"];
 
-                      return Selectable(
-                        selectWordOnDoubleTap: true,
-                        popupMenuItems: [
-                          SelectableMenuItem(
-                            icon: Icons.brush_outlined,
-                            title: 'Color Red',
-                            isEnabled: (controller) =>
-                                controller!.isTextSelected,
-                            handler: (controller) {
-                              final selection = controller?.getSelection();
-                              final startIndex = selection?.startIndex;
-                              final endIndex = selection?.endIndex;
-                              if (selection != null &&
-                                  startIndex != null &&
-                                  endIndex != null &&
-                                  endIndex > startIndex) {
-                                final result1 = spans.splitAtCharacterIndex(
-                                    SplitAtIndex(startIndex));
-                                final result2 = result1.last
-                                    .splitAtCharacterIndex(
-                                        SplitAtIndex(endIndex - startIndex));
-                                setState(() {
-                                  spans = [
-                                    if (result1.length > 1) ...result1.first,
-                                    TextSpan(
-                                      children: result2.first,
-                                      style: const TextStyle(color: Colors.red),
-                                    ),
-                                    if (result2.length > 1) ...result2.last,
-                                  ];
-                                });
-                                controller!.deselect();
-                              }
-                              return true;
-                            },
-                          ),
-                        ],
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          child: FloatColumn(
-                              children: [TextSpan(children: spans)]),
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text("Dataset"),
+              ),
+              body: Column(
+                children: [
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(14.0),
+                    child: Row(
+                      children: const [
+                        Text(
+                          'ID',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
-                      );
-                    },
+                        Spacer(),
+                        Text(
+                          'Text',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Spacer(),
+                        Text(
+                          'Action',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 100,
-                ),
-                Expanded(
-                  child: Wrap(
-                    spacing: 6.0,
-                    runSpacing: 6.0,
-                    children: [
-                      for (var i in labels)
-                        Chip(
-                          labelStyle: TextStyle(
-                              color: Color(hexStringToInt(i.textColor!))),
-                          backgroundColor:
-                              Color(hexStringToInt(i.backgroundColor!)),
-                          label: Text(i.text!),
-                        )
-                    ],
+                  const Divider(
+                    height: 15,
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                        child: ListView.separated(
+                      scrollDirection: Axis.vertical,
+                      shrinkWrap: true,
+                      itemCount: examples.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Column(
+                          children: [
+                            SizedBox(
+                              height: 60,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 50,
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(
+                                              examples[index].id.toString()),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(left: 12.0),
+                                      child: SizedBox(
+                                          width: double.infinity,
+                                          child: ClipRect(
+                                            child: Text(
+                                              examples[index].text!,
+                                              maxLines: 3,
+                                              overflow: TextOverflow.ellipsis,
+                                              style:
+                                                  const TextStyle(fontSize: 15),
+                                            ),
+                                          )),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 3.0),
+                                    child: TextButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SingleTextPage(
+                                                      passedExample:
+                                                          examples[index]
+                                                              .toJson())),
+                                        );
+                                      },
+                                      child: const Text('Validate'),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            )
+                          ],
+                        );
+                      },
+                      separatorBuilder: (BuildContext context, int index) =>
+                          const Divider(
+                        height: 20,
+                      ),
+                    )),
+                  ),
+                ],
+              ),
             );
           }
-          return const Center(
-            child: CircularProgressIndicatorWithText(
-                "Fetching labels and examples..."),
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicatorWithText(
+                  "Fetching labels and examples..."),
+            ),
           );
         });
   }

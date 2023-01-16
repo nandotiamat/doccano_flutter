@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:dio/dio.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/utils/show_error_dialog.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +17,9 @@ Future<dynamic> doccanoLogin(
 
     if (response.statusCode == 200) {
       key = response.data["key"];
+      options = Options(
+          headers: {'Authorization': 'Token $key', "Connection": "Keep-Alive"});
+
       return true;
     } else {
       return false;
@@ -26,6 +29,9 @@ Future<dynamic> doccanoLogin(
     //response = await dio.get("$doccanoWS/v1/projects/$projectID", options: options);
   } on TimeoutException {
     await showErrorDialog(context, 'Check Webserver Status');
+  } catch (e) {
+    //TODO ERROR PAGE
+
   }
   return false;
 }

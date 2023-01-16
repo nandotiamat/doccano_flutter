@@ -20,7 +20,6 @@ Future<bool> login() async {
       return true;
     }
   } catch (e) {
-
     //TODO ERROR PAGE
   }
 

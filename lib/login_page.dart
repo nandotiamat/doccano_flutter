@@ -50,77 +50,79 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           width: MediaQuery.of(context).size.width,
           child: Center(
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 40,
-                ),
-                const LogoAnimation(),
-                const SizedBox(
-                  height: 60,
-                ),
-                TextField(
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(
+                    height: 40,
                   ),
-                  controller: _username,
-                  keyboardType: TextInputType.name,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your doccano username here',
+                  const LogoAnimation(),
+                  const SizedBox(
+                    height: 60,
                   ),
-                ),
-                const SizedBox(
-                  height: 40,
-                ),
-                TextField(
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                  controller: _password,
-                  obscureText: true,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  decoration: const InputDecoration(
-                    hintText: 'Enter your doccano password here',
-                  ),
-                ),
-                const SizedBox(
-                  height: 40,
-                ),
-                TextButton(
-                  onPressed: () async {
-                    final username = _username.text;
-                    final password = _password.text;
-
-                    try {
-                      if (await doccanoLogin(username, password, context)) {
-                        if (!mounted) return;
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          homePageRoute,
-                          (route) => false,
-                        );
-                      }
-                    } catch (e) {
-                      showErrorDialog(context, 'Wrong Credential');
-                    }
-                  },
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
+                  TextField(
+                    style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
                     ),
+                    controller: _username,
+                    keyboardType: TextInputType.name,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your doccano username here',
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 50,
-                ),
-                const Text(
-                  'Remind to check the status of the doccano webserver',
-                )
-              ],
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  TextField(
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                    controller: _password,
+                    obscureText: true,
+                    enableSuggestions: false,
+                    autocorrect: false,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter your doccano password here',
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 40,
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      final username = _username.text;
+                      final password = _password.text;
+
+                      try {
+                        if (await doccanoLogin(username, password, context)) {
+                          if (!mounted) return;
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            validationRoute,
+                            (route) => false,
+                          );
+                        }
+                      } catch (e) {
+                        showErrorDialog(context, 'Wrong Credential');
+                      }
+                    },
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  const Text(
+                    'Remind to check the status of the doccano webserver',
+                  )
+                ],
+              ),
             ),
           ),
         ),
