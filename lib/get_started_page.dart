@@ -7,6 +7,7 @@ class GetStartedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFFFFFF),
       body: SafeArea(
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -16,9 +17,10 @@ class GetStartedPage extends StatelessWidget {
             children: [
               Container(
                   margin: const EdgeInsets.only(right: 25),
-                  child: Image.asset("images/doccanologo.png")),
+                  child:
+                      Center(child: Image.asset('images/exoticdoccano.png'))),
               const SizedBox(
-                height: 15,
+                height: 150,
               ),
               const Text(
                 'Mobile Client for Doccano!',
@@ -28,7 +30,7 @@ class GetStartedPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(
-                height: 35,
+                height: 45,
               ),
               ElevatedButton(
                 onPressed: () {
