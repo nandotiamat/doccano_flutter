@@ -41,8 +41,7 @@ class _HomepageState extends State<Homepage> {
     _future = getData();
   }
 
-  void updateSelectedLabel(Label selectedLabel) {
-    debugPrint("Ho selezionato ${selectedLabel.text}");
+  void updateSelectedLabel(Label? selectedLabel) {
     setState(() {
       this.selectedLabel = selectedLabel;
     });
