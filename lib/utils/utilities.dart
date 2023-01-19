@@ -1,1 +1,2 @@
-int hexStringToInt(String hexString) => int.parse("0xFF${hexString.substring(1)}");
+int hexStringToInt(String hexString) =>
+    int.parse("0xFF${hexString.substring(1)}");

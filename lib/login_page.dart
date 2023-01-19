@@ -1,4 +1,4 @@
-import 'package:doccano_flutter/constants/logoanimation.dart';
+import 'package:doccano_flutter/constants/logo_animation.dart';
 import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:doccano_flutter/utils/show_error_dialog.dart';
@@ -49,19 +49,17 @@ class _LoginPageState extends State<LoginPage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 30.0),
           width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           child: Center(
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  const SizedBox(
-                    height: 40,
+                  const Padding(
+                    padding: EdgeInsets.only(top: 40),
                   ),
                   const LogoAnimation(),
-                  const SizedBox(
-                    height: 60,
-                  ),
-                  const SizedBox(
-                    height: 30,
+                  const Padding(
+                    padding: EdgeInsets.only(top: 60),
                   ),
                   TextField(
                     style: const TextStyle(
@@ -73,6 +71,9 @@ class _LoginPageState extends State<LoginPage> {
                     decoration: const InputDecoration(
                       hintText: 'Enter your doccano username here',
                     ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 30),
                   ),
                   TextField(
                     style: const TextStyle(
@@ -87,6 +88,9 @@ class _LoginPageState extends State<LoginPage> {
                       hintText: 'Enter your doccano password here',
                     ),
                   ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 30),
+                  ),
                   TextButton(
                     onPressed: () async {
                       final username = _username.text;
@@ -96,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
                         if (await login(username, password)) {
                           if (!mounted) return;
                           Navigator.of(context).pushNamedAndRemoveUntil(
-                            homePageRoute,
+                            projectsRoute,
                             (route) => false,
                           );
                         }
@@ -112,8 +116,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    height: 50,
+                  const Padding(
+                    padding: EdgeInsets.only(top: 50),
                   ),
                   const Text(
                     'Remind to check the status of the doccano webserver',
