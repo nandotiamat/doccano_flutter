@@ -5,6 +5,7 @@ import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/projects.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<bool> login(String username, String password) async {
   var dataLogin = {"username": username, "password": password};
@@ -24,22 +25,38 @@ Future<bool> login(String username, String password) async {
 }
 
 Future<List<Label>> getLabels() async {
-  var response = await dio.get("$doccanoWS/v1/projects/$projectID/span-types",
+  var projectId = prefs.getInt("PROJECT_ID");
+
+  var response = await dio.get("$doccanoWS/v1/projects/$projectId/span-types",
       options: options);
   List<Label> labels = [];
   response.data.forEach((label) => labels.add(Label.fromJson(label)));
   return labels;
 }
 
-Future<List<Example?>> getExamples() async {
+Future<List<Example?>> getExamples(int? offset) async {
   // ARBITRARIO
-  Map<String, dynamic> params = {"limit": 800};
-  var response = await dio.get("$doccanoWS/v1/projects/$projectID/examples",
-      options: options, queryParameters: params);
+  Map<String, dynamic> params = {
+    "limit": 50,
+    "confirmed": false,
+    "offset": offset
+  };
+  var projectId = prefs.getInt("PROJECT_ID");
   List<Example>? examples = [];
-  response.data["results"]
-      .forEach((example) => examples.add(Example.fromJson(example)));
-  return examples;
+
+  if (dotenv.get("ENV") == "development") {
+    var response = await dio.get("$doccanoWS/v1/projects/$projectID/examples",
+        options: options, queryParameters: params);
+    response.data["results"]
+        .forEach((example) => examples.add(Example.fromJson(example)));
+    return examples;
+  } else {
+    var response = await dio.get("$doccanoWS/v1/projects/$projectId/examples",
+        options: options, queryParameters: params);
+    response.data["results"]
+        .forEach((example) => examples.add(Example.fromJson(example)));
+    return examples;
+  }
 }
 
 Future<List<Project?>?> getProjects() async {

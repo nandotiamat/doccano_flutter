@@ -21,9 +21,9 @@ class _LabelsViewState extends State<LabelsView> {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
     }
 
-    List<Label?>? examples = await getLabels();
+    List<Label?>? labels = await getLabels();
 
-    return examples;
+    return labels;
   }
 
   @override
@@ -40,22 +40,25 @@ class _LabelsViewState extends State<LabelsView> {
           future: _future,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return Wrap(
-                spacing: 6.0,
-                runSpacing: 6.0,
-                children: snapshot.data!
-                    .map(
-                      (label) => ActionChip(
-                        onPressed: () => {},
-                        labelStyle: TextStyle(
-                            color: Color(hexStringToInt(label!.textColor!))),
-                        backgroundColor:
-                            Color(hexStringToInt(label.backgroundColor!)),
-                        label: Text(label.text!),
-                      ),
-                    )
-                    .toList()
-                    .cast<Widget>(),
+              List<Label?>? labels = snapshot.data;
+
+              return Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: labels!.length,
+                  itemBuilder: (context, index) {
+                    return ActionChip(
+                      onPressed: () => {},
+                      labelStyle: TextStyle(
+                          color:
+                              Color(hexStringToInt(labels[index]!.textColor!))),
+                      backgroundColor: Color(
+                          hexStringToInt(labels[index]!.backgroundColor!)),
+                      label: Text(labels[index]!.text!),
+                    );
+                  },
+                ),
               );
             } else if (snapshot.hasError) {
               return Text("${snapshot.error}");

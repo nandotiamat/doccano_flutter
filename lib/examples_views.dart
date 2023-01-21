@@ -4,17 +4,16 @@ import 'package:doccano_flutter/single_example_page.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'constants/get_rows_for_page.dart';
 
-class ValidationPage extends StatefulWidget {
-  const ValidationPage({super.key});
+class ExampleView extends StatefulWidget {
+  const ExampleView({super.key});
 
   @override
-  State<ValidationPage> createState() => _ValidationPage();
+  State<ExampleView> createState() => _ExampleViewState();
 }
 
-class _ValidationPage extends State<ValidationPage> {
+class _ExampleViewState extends State<ExampleView> {
   late Future<List<Example?>?> _future;
   late int offset;
 
@@ -40,7 +39,7 @@ class _ValidationPage extends State<ValidationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Validation Page')),
+      appBar: AppBar(title: const Text('Dataset')),
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
@@ -142,7 +141,7 @@ class MyDataSource extends DataTableSource {
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: Text(
-              examples?[index]!.id.toString() ?? 'we',
+              examples![index]!.id.toString(),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -152,7 +151,7 @@ class MyDataSource extends DataTableSource {
             width: 160,
             child: ClipRect(
               child: Text(
-                examples?[index]!.text ?? '',
+                examples![index]!.text!,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 18),
@@ -170,7 +169,7 @@ class MyDataSource extends DataTableSource {
             );
           },
           child: const Text(
-            'Validate',
+            'View',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         )),

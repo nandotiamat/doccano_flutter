@@ -34,7 +34,7 @@ class _DoccanoFlutterState extends State<DoccanoFlutter> {
         debugShowCheckedModeBanner: false,
         title: 'Doccano Futter',
         initialRoute: dotenv.get("ENV") == "development"
-            ? projectsRoute
+            ? validationRoute
             : getStartedRoute,
         routes: {
           getStartedRoute: (context) => const GetStartedPage(),

@@ -25,7 +25,7 @@ class _HomepageState extends State<Homepage> {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
     }
     List<Label?>? labels = await getLabels();
-    List<Example?>? examples = await getExamples();
+    List<Example?>? examples = await getExamples(0);
     Map<String, dynamic> data = {"examples": examples, "labels": labels};
 
     setState(() {
