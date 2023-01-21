@@ -22,7 +22,7 @@ class _ExampleViewState extends State<ExampleView> {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
     }
 
-    List<Example?>? examples = await getExamples(0);
+    List<Example?>? examples = await getExamples('', 0);
 
     return examples;
   }
@@ -59,7 +59,7 @@ class _ExampleViewState extends State<ExampleView> {
                             scrollController.jumpTo(0.0);
 
                             List<Example?>? fetchedExamples =
-                                await getExamples(offset);
+                                await getExamples('', offset);
                             for (var example in fetchedExamples) {
                               examples!.add(example);
                             }

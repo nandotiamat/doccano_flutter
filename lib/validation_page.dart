@@ -23,7 +23,7 @@ class _ValidationPage extends State<ValidationPage> {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
     }
 
-    List<Example?>? examples = await getExamples(0);
+    List<Example?>? examples = await getExamples('true', 0);
 
     return examples;
   }
@@ -60,7 +60,7 @@ class _ValidationPage extends State<ValidationPage> {
                             scrollController.jumpTo(0.0);
 
                             List<Example?>? fetchedExamples =
-                                await getExamples(offset);
+                                await getExamples('true', offset);
                             for (var example in fetchedExamples) {
                               examples!.add(example);
                             }

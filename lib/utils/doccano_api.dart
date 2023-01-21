@@ -30,15 +30,16 @@ Future<List<Label>> getLabels() async {
   var response = await dio.get("$doccanoWS/v1/projects/$projectId/span-types",
       options: options);
   List<Label> labels = [];
+
   response.data.forEach((label) => labels.add(Label.fromJson(label)));
   return labels;
 }
 
-Future<List<Example?>> getExamples(int? offset) async {
+Future<List<Example?>> getExamples(String confirmed, int offset) async {
   // ARBITRARIO
   Map<String, dynamic> params = {
     "limit": 50,
-    "confirmed": false,
+    "confirmed": confirmed,
     "offset": offset
   };
   var projectId = prefs.getInt("PROJECT_ID");
@@ -70,4 +71,14 @@ Future<List<Project?>?> getProjects() async {
       .forEach((project) => projects.add(Project.fromJson(project)));
 
   return projects;
+}
+
+Future<void> deleteProject(int projectId) async {
+  try {
+    await dio
+        .delete("$doccanoWS/v1/projects/$projectId", options: options)
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    print(e.toString());
+  }
 }

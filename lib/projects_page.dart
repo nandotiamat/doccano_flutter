@@ -154,31 +154,99 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                 ),
                                               ]),
                                         ),
-                                        TextButton(
-                                          onPressed: () async {
-                                            await prefs.setInt('PROJECT_ID',
-                                                projects[index]!.id!);
-                                            // ignore: use_build_context_synchronously
-                                            Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    settings: RouteSettings(
-                                                      name: '/projectMenu/',
-                                                      arguments:
-                                                          projects[index],
-                                                    ),
-                                                    builder: (context) =>
-                                                        ProjectMenuPage(
-                                                            passedProject:
-                                                                projects[
-                                                                    index])));
-                                          },
-                                          child: const Text(
-                                            'Select',
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 20),
-                                          ),
+                                        Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 16.0),
+                                              child: TextButton(
+                                                onPressed: () async {
+                                                  await prefs.setInt(
+                                                      'PROJECT_ID',
+                                                      projects[index]!.id!);
+                                                  // ignore: use_build_context_synchronously
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          settings:
+                                                              RouteSettings(
+                                                            name:
+                                                                '/projectMenu/',
+                                                            arguments:
+                                                                projects[index],
+                                                          ),
+                                                          builder: (context) =>
+                                                              ProjectMenuPage(
+                                                                  passedProject:
+                                                                      projects[
+                                                                          index])));
+                                                },
+                                                child: const Text(
+                                                  'Select',
+                                                  style: TextStyle(
+                                                      color: Color.fromARGB(
+                                                          255, 124, 229, 128),
+                                                      fontSize: 20),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  top: 20.0),
+                                              child: TextButton(
+                                                onPressed: () async {
+                                                  await showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              'Confirm Delete'),
+                                                          content: const Text(
+                                                              'Are you sure you want to delete this project'),
+                                                          actions: <Widget>[
+                                                            TextButton(
+                                                                onPressed:
+                                                                    () async {
+                                                                  await deleteProject(
+                                                                      projects[
+                                                                              index]!
+                                                                          .id!);
+                                                                  // ignore: use_build_context_synchronously
+                                                                  Navigator.pop(
+                                                                      context);
+
+                                                                  setState(() {
+                                                                    _future =
+                                                                        getData();
+                                                                  });
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                        'yes')),
+                                                            TextButton(
+                                                                onPressed:
+                                                                    () async {
+                                                                  Navigator.pop(
+                                                                      context);
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                        'no')),
+                                                          ],
+                                                        );
+                                                      });
+                                                },
+                                                child: const Text(
+                                                  'Delete',
+                                                  style: TextStyle(
+                                                      color: Color.fromARGB(
+                                                          255, 237, 56, 43),
+                                                      fontSize: 20),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
