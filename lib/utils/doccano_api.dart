@@ -4,14 +4,16 @@ import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
+import 'package:doccano_flutter/models/projects.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<bool> login(String username, String password) async {
   var dataLogin = {"username": username, "password": password};
 
   var response = await dio
       .post("$doccanoWS/v1/auth/login/", data: dataLogin)
-      .timeout(const Duration(seconds: 3));
+      .timeout(const Duration(seconds: 20));
 
   if (response.statusCode == 200) {
     key = response.data["key"];
@@ -24,22 +26,62 @@ Future<bool> login(String username, String password) async {
 }
 
 Future<List<Label>> getLabels() async {
-  var response = await dio.get("$doccanoWS/v1/projects/$projectID/span-types",
+  var projectId = prefs.getInt("PROJECT_ID");
+
+  var response = await dio.get("$doccanoWS/v1/projects/$projectId/span-types",
       options: options);
   List<Label> labels = [];
+
   response.data.forEach((label) => labels.add(Label.fromJson(label)));
   return labels;
 }
 
-Future<List<Example?>> getExamples() async {
+Future<List<Example?>> getExamples(String confirmed, int offset) async {
   // ARBITRARIO
-  Map<String, dynamic> params = {"limit": 100};
-  var response = await dio.get("$doccanoWS/v1/projects/$projectID/examples",
-      options: options, queryParameters: params);
+  Map<String, dynamic> params = {
+    "limit": 50,
+    "confirmed": confirmed,
+    "offset": offset
+  };
+  var projectId = prefs.getInt("PROJECT_ID");
   List<Example>? examples = [];
+
+  if (dotenv.get("ENV") == "development") {
+    var response = await dio.get("$doccanoWS/v1/projects/$projectID/examples",
+        options: options, queryParameters: params);
+    response.data["results"]
+        .forEach((example) => examples.add(Example.fromJson(example)));
+    return examples;
+  } else {
+    var response = await dio.get("$doccanoWS/v1/projects/$projectId/examples",
+        options: options, queryParameters: params);
+    response.data["results"]
+        .forEach((example) => examples.add(Example.fromJson(example)));
+    return examples;
+  }
+}
+
+Future<List<Project?>?> getProjects() async {
+  String filter = 'created_at';
+  Map<String, dynamic> params = {"ordering": filter};
+  var response = await dio.get("$doccanoWS/v1/projects",
+      options: options, queryParameters: params);
+
+  List<Project?>? projects = [];
   response.data["results"]
-      .forEach((example) => examples.add(Example.fromJson(example)));
-  return examples;
+      .forEach((project) => projects.add(Project.fromJson(project)));
+
+  return projects;
+}
+
+Future<void> deleteProject(int projectId) async {
+  try {
+    await dio
+        .delete("$doccanoWS/v1/projects/$projectId", options: options)
+        .timeout(const Duration(seconds: 5));
+  } catch (e) {
+    print(e.toString());
+  }
 }
 
 Future<List<Span>?> getSpans(int exampleID) async {

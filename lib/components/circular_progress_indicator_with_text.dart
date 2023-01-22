@@ -12,8 +12,8 @@ class CircularProgressIndicatorWithText extends StatelessWidget {
       child: Column(
         children: [
           const CircularProgressIndicator(),
-          const SizedBox(
-            height: 20,
+          const Padding(
+            padding: EdgeInsets.only(top: 20),
           ),
           Text(text)
         ],

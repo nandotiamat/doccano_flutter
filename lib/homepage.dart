@@ -17,8 +17,8 @@ import 'package:doccano_flutter/utils/utilities.dart';
 // import 'package:doccano_flutter/extensions/inline_span_ext.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key});
-
+  const Homepage({super.key, required this.example});
+  final Example example; 
   @override
   State<Homepage> createState() => _HomepageState();
 }
@@ -35,21 +35,21 @@ class _HomepageState extends State<Homepage> {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
     }
     List<Label> labels = await getLabels();
-    List<Example?>? examples = await getExamples();
-    List<Span>? spans = await getSpans(38);
+    // List<Example?>? examples = await getExamples('false', 0);
+    List<Span>? spans = await getSpans(widget.example.id!);
 
     spans!.sort(((a, b) => b.startOffset.compareTo(a.startOffset)));
     //order Spans by start_offset desc
 
     Map<String, dynamic> data = {
-      "examples": examples,
+      // "examples": examples,
       "labels": labels,
       "fetchedSpans": spans
     };
 
     setState(() {
       // TODO 
-      _spans = [TextSpan(text: data["examples"][0].text!)];
+      _spans = [TextSpan(text: widget.example.text)];
       fetchedSpans = spans;
       fetchedLabels = labels;
     });
@@ -86,7 +86,7 @@ class _HomepageState extends State<Homepage> {
               }
               return false;
             });
-            bool resourceDeleted = await deleteSpan(38, span.id).then((deleted) => deleted ? true : false);
+            bool resourceDeleted = await deleteSpan(widget.example.id!, span.id).then((deleted) => deleted ? true : false);
               if (!resourceDeleted) return;
             setState(() {
               LabelTextSpan oldLabelTextSpan =
@@ -151,7 +151,7 @@ class _HomepageState extends State<Homepage> {
                 return false;
               });
               // TODO REMOVED FIXED EXAMPLE ID
-              bool resourceDeleted = await deleteSpan(38, span.id).then((deleted) => deleted ? true : false);
+              bool resourceDeleted = await deleteSpan(widget.example.id!, span.id).then((deleted) => deleted ? true : false);
               if (!resourceDeleted) return;
               setState(() {
                 LabelTextSpan oldLabelTextSpan =
@@ -209,7 +209,7 @@ class _HomepageState extends State<Homepage> {
       // Split `result1.last` at `endIndex - startIndex`:
       final result2 = result1.last
           .splitAtCharacterIndex(SplitAtIndex(endIndex - startIndex));
-      createSpan(38, startIndex - numberOfPreviousWidgetSpan, endIndex - numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
+      createSpan(widget.example.id!, startIndex - numberOfPreviousWidgetSpan, endIndex - numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
           ?.then((spanToBuild) {
         return buildSpan(spanToBuild!, result1, result2);
       });
@@ -226,7 +226,7 @@ class _HomepageState extends State<Homepage> {
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            List<Example> examples = snapshot.data!["examples"];
+            // List<Example> examples = snapshot.data!["examples"];
             List<Label> labels = snapshot.data!["labels"];
 
             return Scaffold(
