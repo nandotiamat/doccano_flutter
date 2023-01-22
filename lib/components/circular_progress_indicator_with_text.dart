@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CircularProgressIndicatorWithText extends StatelessWidget {
-  final String text;
-
   const CircularProgressIndicatorWithText(this.text, {super.key});
-
+  
+  final String text;
+  
   @override
   Widget build(BuildContext context) {
     return SizedBox(
