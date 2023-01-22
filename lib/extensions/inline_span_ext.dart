@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/components/label_text_span.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -121,7 +122,7 @@ extension InlineSpanExt on InlineSpan {
           }
         }
       }
-    } else if (span is WidgetSpan) {
+    } else if (span is LabelWidgetSpan) {
       // index.value =- 1;
     }
     else {

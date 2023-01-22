@@ -1,3 +1,4 @@
+import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:selectable/selectable.dart';
@@ -13,7 +14,7 @@ import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
 //EXTENSIONS
-import 'package:doccano_flutter/extensions/inline_span_ext.dart';
+// import 'package:doccano_flutter/extensions/inline_span_ext.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -47,6 +48,7 @@ class _HomepageState extends State<Homepage> {
     };
 
     setState(() {
+      // TODO 
       _spans = [TextSpan(text: data["examples"][0].text!)];
       fetchedSpans = spans;
       fetchedLabels = labels;
@@ -186,14 +188,13 @@ class _HomepageState extends State<Homepage> {
   }
 
   bool handlerAddSpanController(SelectableController? controller) {
-    final selection = controller?.getSelection();
-    final startIndex = selection?.startIndex;
-    final endIndex = selection?.endIndex;
-    debugPrint("Start index: $startIndex End index: $endIndex");
     if (selectedLabel == null) {
       debugPrint("Non sono selezionate label.");
       return false;
     }
+    final selection = controller?.getSelection();
+    final startIndex = selection?.startIndex;
+    final endIndex = selection?.endIndex;
     if (selection != null &&
         startIndex != null &&
         endIndex != null &&
@@ -208,7 +209,7 @@ class _HomepageState extends State<Homepage> {
       // Split `result1.last` at `endIndex - startIndex`:
       final result2 = result1.last
           .splitAtCharacterIndex(SplitAtIndex(endIndex - startIndex));
-      createSpan(38, startIndex + numberOfPreviousWidgetSpan, endIndex + numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
+      createSpan(38, startIndex - numberOfPreviousWidgetSpan, endIndex - numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
           ?.then((spanToBuild) {
         return buildSpan(spanToBuild!, result1, result2);
       });
