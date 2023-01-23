@@ -1,10 +1,10 @@
+import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/get_started_page.dart';
 import 'package:doccano_flutter/globals.dart';
-import 'package:doccano_flutter/homepage.dart';
 import 'package:doccano_flutter/login_page.dart';
-import 'package:doccano_flutter/projects_page.dart';
-import 'package:doccano_flutter/validation_page.dart';
+import 'package:doccano_flutter/projects_selection_page.dart';
+import 'package:doccano_flutter/views/validation_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -39,8 +39,8 @@ class _DoccanoFlutterState extends State<DoccanoFlutter> {
         routes: {
           getStartedRoute: (context) => const GetStartedPage(),
           loginRoute: (context) => const LoginPage(),
-          // homePageRoute: (context) => const Homepage(),
-          validationRoute: (context) => const ValidationPage(),
+          annotationRoute: (context) => const AnnotationView(),
+          validationRoute: (context) => const ValidationView(),
           projectsRoute: (context) => const ProjectsPage(),
         },
         theme: ThemeData(

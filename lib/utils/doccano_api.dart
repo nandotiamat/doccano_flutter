@@ -61,6 +61,18 @@ Future<List<Example?>> getExamples(String confirmed, int offset) async {
   }
 }
 
+Future<ExampleMetadata?>? getExampleMetaData(int exampleId) async {
+  int? projectId = prefs.getInt("PROJECT_ID");
+
+  var response = await dio.get(
+      "$doccanoWS/v1/projects/$projectId/examples/$exampleId",
+      options: options);
+  Example? example = Example.fromJson(response.data);
+  ExampleMetadata? metaData = example.meta!;
+
+  return metaData;
+}
+
 Future<List<Project?>?> getProjects() async {
   String filter = 'created_at';
   Map<String, dynamic> params = {"ordering": filter};
@@ -74,19 +86,30 @@ Future<List<Project?>?> getProjects() async {
   return projects;
 }
 
+Future<Project?>? getProject() async {
+  int projectId = prefs.getInt("PROJECT_ID")!;
+  var response =
+      await dio.get("$doccanoWS/v1/projects/$projectId", options: options);
+  if (response.statusCode == 200) {
+    return Project.fromJson(response.data);
+  }
+  return null;
+}
+
 Future<void> deleteProject(int projectId) async {
   try {
     await dio
         .delete("$doccanoWS/v1/projects/$projectId", options: options)
         .timeout(const Duration(seconds: 5));
   } catch (e) {
-    print(e.toString());
+    debugPrint(e.toString());
   }
 }
 
 Future<List<Span>?> getSpans(int exampleID) async {
-  
-  Response<List<dynamic>> response = await dio.get("$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans", options: options);
+  Response<List<dynamic>> response = await dio.get(
+      "$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans",
+      options: options);
   List<Span>? fetchedSpans = [];
   if (response.data == null) return null;
   debugPrint(response.data!.length.toString());
@@ -97,9 +120,18 @@ Future<List<Span>?> getSpans(int exampleID) async {
   return fetchedSpans;
 }
 
-Future<Span?>? createSpan(int exampleID, int startOffset, int endOffset, int labelId, int userId) async {
-  Map<String, dynamic> payload = {"end_offset": endOffset, "start_offset": startOffset, "user": userId, "label": labelId};
-  Response<dynamic> response = await dio.post("$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans", options: options, data: payload);
+Future<Span?>? createSpan(int exampleID, int startOffset, int endOffset,
+    int labelId, int userId) async {
+  Map<String, dynamic> payload = {
+    "end_offset": endOffset,
+    "start_offset": startOffset,
+    "user": userId,
+    "label": labelId
+  };
+  Response<dynamic> response = await dio.post(
+      "$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans",
+      options: options,
+      data: payload);
   if (response.data == null) return null;
   if (response.statusCode == 201) {
     Span createdSpan = Span.fromJson(response.data);
@@ -111,11 +143,14 @@ Future<Span?>? createSpan(int exampleID, int startOffset, int endOffset, int lab
 }
 
 Future<bool> deleteSpan(int exampleID, int spanID) async {
-  Response<dynamic> response = await dio.delete("$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans/$spanID", options: options);
-  
+  Response<dynamic> response = await dio.delete(
+      "$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans/$spanID",
+      options: options);
+
   if (response.data == null) return false;
   if (response.statusCode == 204) {
-    debugPrint("Span $spanID from example $exampleID was successfully deleted.");
+    debugPrint(
+        "Span $spanID from example $exampleID was successfully deleted.");
     // RESOURCE DELETED
     return true;
   }

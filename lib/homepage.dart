@@ -18,7 +18,7 @@ import 'package:doccano_flutter/utils/utilities.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key, required this.example});
-  final Example example; 
+  final Example example;
   @override
   State<Homepage> createState() => _HomepageState();
 }
@@ -48,7 +48,7 @@ class _HomepageState extends State<Homepage> {
     };
 
     setState(() {
-      // TODO 
+      // TODO
       _spans = [TextSpan(text: widget.example.text)];
       fetchedSpans = spans;
       fetchedLabels = labels;
@@ -86,8 +86,9 @@ class _HomepageState extends State<Homepage> {
               }
               return false;
             });
-            bool resourceDeleted = await deleteSpan(widget.example.id!, span.id).then((deleted) => deleted ? true : false);
-              if (!resourceDeleted) return;
+            bool resourceDeleted = await deleteSpan(widget.example.id!, span.id)
+                .then((deleted) => deleted ? true : false);
+            if (!resourceDeleted) return;
             setState(() {
               LabelTextSpan oldLabelTextSpan =
                   _spans!.elementAt(index) as LabelTextSpan;
@@ -130,7 +131,8 @@ class _HomepageState extends State<Homepage> {
       final endIndex = span.endOffset;
       debugPrint(
           "${fetchedSpans.indexOf(span)} $span: $startIndex - $endIndex");
-      final result1 = temporarySpans.splitAtCharacterIndex(SplitAtIndex(startIndex));
+      final result1 =
+          temporarySpans.splitAtCharacterIndex(SplitAtIndex(startIndex));
       final result2 = result1.last
           .splitAtCharacterIndex(SplitAtIndex(endIndex - startIndex));
 
@@ -151,7 +153,9 @@ class _HomepageState extends State<Homepage> {
                 return false;
               });
               // TODO REMOVED FIXED EXAMPLE ID
-              bool resourceDeleted = await deleteSpan(widget.example.id!, span.id).then((deleted) => deleted ? true : false);
+              bool resourceDeleted =
+                  await deleteSpan(widget.example.id!, span.id)
+                      .then((deleted) => deleted ? true : false);
               if (!resourceDeleted) return;
               setState(() {
                 LabelTextSpan oldLabelTextSpan =
@@ -170,21 +174,22 @@ class _HomepageState extends State<Homepage> {
         chip: labelWidgetSpan,
         label: span,
         style: TextStyle(
-            backgroundColor: Color(hexStringToInt(spanLabel.backgroundColor!))),
+            backgroundColor: Color(hexStringToInt(spanLabel.backgroundColor!)),
+            color: Color(hexStringToInt(spanLabel.textColor!))),
         text: result2.first
             .fold('', (prev, curr) => '$prev${curr.toPlainText()}'),
       );
       // Update the state with the new spans.
       temporarySpans = [
-          if (result1.length > 1) ...result1.first,
-          labelTextSpan,
-          labelWidgetSpan,
-          if (result2.length > 1) ...result2.last,
-        ];
+        if (result1.length > 1) ...result1.first,
+        labelTextSpan,
+        labelWidgetSpan,
+        if (result2.length > 1) ...result2.last,
+      ];
     }
     setState(() {
-        _spans = temporarySpans;
-      });
+      _spans = temporarySpans;
+    });
   }
 
   bool handlerAddSpanController(SelectableController? controller) {
@@ -199,9 +204,8 @@ class _HomepageState extends State<Homepage> {
         startIndex != null &&
         endIndex != null &&
         endIndex > startIndex) {
-          
-      int numberOfPreviousWidgetSpan = fetchedSpans
-          !.where((element) => element.startOffset < startIndex)
+      int numberOfPreviousWidgetSpan = fetchedSpans!
+          .where((element) => element.startOffset < startIndex)
           .length;
       // Split `_spans` at `startIndex`:
       final result1 = _spans!.splitAtCharacterIndex(SplitAtIndex(startIndex));
@@ -209,7 +213,8 @@ class _HomepageState extends State<Homepage> {
       // Split `result1.last` at `endIndex - startIndex`:
       final result2 = result1.last
           .splitAtCharacterIndex(SplitAtIndex(endIndex - startIndex));
-      createSpan(widget.example.id!, startIndex - numberOfPreviousWidgetSpan, endIndex - numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
+      createSpan(widget.example.id!, startIndex - numberOfPreviousWidgetSpan,
+              endIndex - numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
           ?.then((spanToBuild) {
         return buildSpan(spanToBuild!, result1, result2);
       });

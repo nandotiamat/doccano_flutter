@@ -1,20 +1,19 @@
 import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/homepage.dart';
 import 'package:doccano_flutter/models/examples.dart';
-import 'package:doccano_flutter/single_example_page.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'constants/get_rows_for_page.dart';
+import '../constants/get_rows_for_page.dart';
 
-class ExampleView extends StatefulWidget {
-  const ExampleView({super.key});
+class AnnotationView extends StatefulWidget {
+  const AnnotationView({super.key});
 
   @override
-  State<ExampleView> createState() => _ExampleViewState();
+  State<AnnotationView> createState() => _AnnotationViewState();
 }
 
-class _ExampleViewState extends State<ExampleView> {
+class _AnnotationViewState extends State<AnnotationView> {
   late Future<List<Example?>?> _future;
   late int offset;
 
@@ -40,7 +39,10 @@ class _ExampleViewState extends State<ExampleView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dataset')),
+      appBar: AppBar(
+        title: const Text('Dataset'),
+        automaticallyImplyLeading: false,
+      ),
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
@@ -48,53 +50,52 @@ class _ExampleViewState extends State<ExampleView> {
             List<Example?>? examples = snapshot.data;
 
             return LayoutBuilder(builder: (context, constraint) {
-              return Container(
+              return SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
                   controller: scrollController,
-                  child: Center(
-                    child: PaginatedDataTable(
-                      onPageChanged: (value) async {
-                        scrollController.jumpTo(0.0);
+                  child: PaginatedDataTable(
+                    onPageChanged: (value) async {
+                      scrollController.jumpTo(0.0);
 
-                        List<Example?>? fetchedExamples =
-                            await getExamples('', offset);
-                        for (var example in fetchedExamples) {
-                          examples!.add(example);
-                        }
-                        setState(() {
-                          offset += 50;
-                        });
-                      },
-                      dataRowHeight: 90,
-                      columnSpacing: 30,
-                      horizontalMargin: 10,
-                      showCheckboxColumn: false,
-                      rowsPerPage: getRowsForPage(constraint),
-                      sortColumnIndex: 1,
-                      sortAscending: true,
-                      columns: const [
-                        DataColumn(
-                            label: Text(
-                          'ID',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Text',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Action',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        )),
-                      ],
-                      source: MyDataSource(examples, context),
-                    ),
+                      List<Example?>? fetchedExamples =
+                          await getExamples('', offset);
+                      for (var example in fetchedExamples) {
+                        examples!.add(example);
+                      }
+                      setState(() {
+                        offset += 50;
+                      });
+                    },
+                    dataRowHeight: 90,
+                    columnSpacing: 30,
+                    horizontalMargin: 10,
+                    showCheckboxColumn: false,
+                    rowsPerPage: getRowsForPage(constraint),
+                    sortColumnIndex: 1,
+                    sortAscending: true,
+                    columns: const [
+                      DataColumn(
+                          label: Text(
+                        'ID',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      )),
+                      DataColumn(
+                          label: Text(
+                        'Text',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      )),
+                      DataColumn(
+                          label: Text(
+                        'Action',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      )),
+                    ],
+                    source: MyDataSource(examples, context),
                   ),
                 ),
               );
@@ -158,13 +159,10 @@ class MyDataSource extends DataTableSource {
         ),
         DataCell(TextButton(
           onPressed: () {
-            print(examples![index]!.id!);
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Homepage(
-                  example: examples![index]!
-                ),
+                builder: (context) => Homepage(example: examples![index]!),
               ),
             );
           },

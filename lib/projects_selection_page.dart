@@ -1,6 +1,6 @@
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/models/projects.dart';
-import 'package:doccano_flutter/project_menu_page.dart';
+import 'package:doccano_flutter/menu_page.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -176,10 +176,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                                 projects[index],
                                                           ),
                                                           builder: (context) =>
-                                                              ProjectMenuPage(
-                                                                  passedProject:
-                                                                      projects[
-                                                                          index])));
+                                                              const MenuPage()));
                                                 },
                                                 child: const Text(
                                                   'Select',
