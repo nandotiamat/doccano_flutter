@@ -55,6 +55,7 @@ class _HomepageState extends State<Homepage> {
     });
 
     buildFetchedSpans(spans, labels);
+    TextSpan().copyWith();
 
     return data;
   }

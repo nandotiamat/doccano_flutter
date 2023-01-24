@@ -21,33 +21,30 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
-          children: const [
-            ProjectView(),
-            AnnotationView(),
-            ValidationView(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Project',
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.new_label_outlined), label: 'Annotate'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.check_circle_outline), label: 'Validate'),
-          ],
-          currentIndex: _currentIndex,
-          selectedItemColor: Colors.blue,
-          onTap: _onItemTapped,
-        ),
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: const [
+          ProjectView(),
+          AnnotationView(),
+          ValidationView(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Project',
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.new_label_outlined), label: 'Annotate'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.check_circle_outline), label: 'Validate'),
+        ],
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
       ),
     );
   }

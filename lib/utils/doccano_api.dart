@@ -112,7 +112,6 @@ Future<List<Span>?> getSpans(int exampleID) async {
       options: options);
   List<Span>? fetchedSpans = [];
   if (response.data == null) return null;
-  debugPrint(response.data!.length.toString());
   if (response.data == []) return [];
   for (var span in response.data!) {
     fetchedSpans.add(Span.fromJson(span));

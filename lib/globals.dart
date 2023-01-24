@@ -14,6 +14,7 @@ void initGlobals() async {
   SharedPreferences.setMockInitialValues({});
 
   prefs = await SharedPreferences.getInstance();
+
   projectID = dotenv.get("PROJECT_ID");
   doccanoWS = dotenv.get("DOCCANO_WEBSERVER_PATH");
 

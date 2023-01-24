@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../constants/get_rows_for_page.dart';
+import '../globals.dart';
 
 class ValidationView extends StatefulWidget {
   const ValidationView({super.key});
@@ -39,6 +40,8 @@ class _ValidationView extends State<ValidationView> {
 
   @override
   Widget build(BuildContext context) {
+    prefs.setBool("DELETE_SPAN", false);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dataset Ready for Validation'),
@@ -168,8 +171,8 @@ class MyDataSource extends DataTableSource {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => ValidationPage(
-                      passedExample: examples![index]!.toJson())),
+                  builder: (context) =>
+                      ValidationPage(passedExample: examples![index]!)),
             );
           },
           child: const Text(
