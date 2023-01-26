@@ -17,12 +17,7 @@ class _LabelsViewState extends State<LabelsView> {
   late Future<List<Label?>?> _future;
 
   Future<List<Label?>?> getData() async {
-    if (dotenv.get("ENV") == "development") {
-      await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
-    }
-
     List<Label?>? labels = await getLabels();
-
     return labels;
   }
 

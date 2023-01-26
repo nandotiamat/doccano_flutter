@@ -9,13 +9,20 @@ late String doccanoWS;
 late Options options;
 late SharedPreferences prefs;
 
-void initGlobals() async {
-  // ignore: invalid_use_of_visible_for_testing_member
-  SharedPreferences.setMockInitialValues({});
-
-  prefs = await SharedPreferences.getInstance();
-  projectID = dotenv.get("PROJECT_ID");
-  doccanoWS = dotenv.get("DOCCANO_WEBSERVER_PATH");
-
+Future<void> initGlobals() async {
   dio = Dio();
+  prefs = await SharedPreferences.getInstance();
+  if (dotenv.get("ENV") == "development") {
+    await prefs.setString("doccano_webserver_path", dotenv.get("DOCCANO_WEBSERVER_PATH"));
+  } 
+}
+
+String? getDoccanoWebServerPath() {
+  if (prefs.getString("doccano_webserver_path") == null) return null;
+  return prefs.getString("doccano_webserver_path")!;
+}
+
+int? getProjectID() {
+  if (prefs.getInt("project_id") == null) return null;
+  return prefs.getInt("project_id");
 }

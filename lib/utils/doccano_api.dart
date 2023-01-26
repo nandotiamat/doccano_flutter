@@ -10,9 +10,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<bool> login(String username, String password) async {
   var dataLogin = {"username": username, "password": password};
-
   var response = await dio
-      .post("$doccanoWS/v1/auth/login/", data: dataLogin)
+      .post("${getDoccanoWebServerPath()!}/v1/auth/login/", data: dataLogin)
       .timeout(const Duration(seconds: 20));
 
   if (response.statusCode == 200) {
@@ -26,9 +25,7 @@ Future<bool> login(String username, String password) async {
 }
 
 Future<List<Label>> getLabels() async {
-  var projectId = prefs.getInt("PROJECT_ID");
-
-  var response = await dio.get("$doccanoWS/v1/projects/$projectId/span-types",
+  var response = await dio.get("${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/span-types",
       options: options);
   List<Label> labels = [];
 
@@ -43,29 +40,18 @@ Future<List<Example?>> getExamples(String confirmed, int offset) async {
     "confirmed": confirmed,
     "offset": offset
   };
-  var projectId = prefs.getInt("PROJECT_ID");
+  
   List<Example>? examples = [];
-
-  if (dotenv.get("ENV") == "development") {
-    var response = await dio.get("$doccanoWS/v1/projects/$projectID/examples",
+    var response = await dio.get("${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples",
         options: options, queryParameters: params);
     response.data["results"]
         .forEach((example) => examples.add(Example.fromJson(example)));
     return examples;
-  } else {
-    var response = await dio.get("$doccanoWS/v1/projects/$projectId/examples",
-        options: options, queryParameters: params);
-    response.data["results"]
-        .forEach((example) => examples.add(Example.fromJson(example)));
-    return examples;
-  }
 }
 
 Future<ExampleMetadata?>? getExampleMetaData(int exampleId) async {
-  int? projectId = prefs.getInt("PROJECT_ID");
-
   var response = await dio.get(
-      "$doccanoWS/v1/projects/$projectId/examples/$exampleId",
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleId",
       options: options);
   Example? example = Example.fromJson(response.data);
   ExampleMetadata? metaData = example.meta!;
@@ -74,9 +60,10 @@ Future<ExampleMetadata?>? getExampleMetaData(int exampleId) async {
 }
 
 Future<List<Project?>?> getProjects() async {
+  print(options);
   String filter = 'created_at';
   Map<String, dynamic> params = {"ordering": filter};
-  var response = await dio.get("$doccanoWS/v1/projects",
+  var response = await dio.get("${getDoccanoWebServerPath()}/v1/projects",
       options: options, queryParameters: params);
 
   List<Project?>? projects = [];
@@ -87,9 +74,8 @@ Future<List<Project?>?> getProjects() async {
 }
 
 Future<Project?>? getProject() async {
-  int projectId = prefs.getInt("PROJECT_ID")!;
   var response =
-      await dio.get("$doccanoWS/v1/projects/$projectId", options: options);
+      await dio.get("${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}", options: options);
   if (response.statusCode == 200) {
     return Project.fromJson(response.data);
   }
@@ -99,7 +85,7 @@ Future<Project?>? getProject() async {
 Future<void> deleteProject(int projectId) async {
   try {
     await dio
-        .delete("$doccanoWS/v1/projects/$projectId", options: options)
+        .delete("${getDoccanoWebServerPath()}/v1/projects/$projectID", options: options)
         .timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint(e.toString());
@@ -108,7 +94,7 @@ Future<void> deleteProject(int projectId) async {
 
 Future<List<Span>?> getSpans(int exampleID) async {
   Response<List<dynamic>> response = await dio.get(
-      "$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans",
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleID/spans",
       options: options);
   List<Span>? fetchedSpans = [];
   if (response.data == null) return null;
@@ -129,7 +115,7 @@ Future<Span?>? createSpan(int exampleID, int startOffset, int endOffset,
     "label": labelId
   };
   Response<dynamic> response = await dio.post(
-      "$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans",
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleID/spans",
       options: options,
       data: payload);
   if (response.data == null) return null;
@@ -144,7 +130,7 @@ Future<Span?>? createSpan(int exampleID, int startOffset, int endOffset,
 
 Future<bool> deleteSpan(int exampleID, int spanID) async {
   Response<dynamic> response = await dio.delete(
-      "$doccanoWS/v1/projects/$projectID/examples/$exampleID/spans/$spanID",
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleID/spans/$spanID",
       options: options);
 
   if (response.data == null) return false;

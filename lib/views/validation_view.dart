@@ -19,10 +19,6 @@ class _ValidationView extends State<ValidationView> {
   late int offset;
 
   Future<List<Example?>?> getData() async {
-    if (dotenv.get("ENV") == "development") {
-      await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
-    }
-
     List<Example?>? examples = await getExamples('true', 0);
 
     return examples;

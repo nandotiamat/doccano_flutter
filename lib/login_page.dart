@@ -1,5 +1,6 @@
 import 'package:doccano_flutter/constants/logo_animation.dart';
 import 'package:doccano_flutter/constants/routes.dart';
+import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:doccano_flutter/utils/show_error_dialog.dart';
 import 'package:flutter/material.dart';
@@ -14,11 +15,13 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   late final TextEditingController _username;
   late final TextEditingController _password;
+  late final TextEditingController _webServerPath;
 
   @override
   void initState() {
     _username = TextEditingController();
     _password = TextEditingController();
+    _webServerPath = TextEditingController();
     super.initState();
   }
 
@@ -26,6 +29,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _username.dispose();
     _password.dispose();
+    _webServerPath.dispose();
     super.dispose();
   }
 
@@ -33,81 +37,104 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Login Page'),
-            Image.asset(
-              'images/doccanologo.png',
-              fit: BoxFit.contain,
-              height: 32,
-            )
-          ],
-        ),
+        title: const Text('Login Page'),
       ),
       body: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Center(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 40),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  width: MediaQuery.of(context).size.width * 3 / 4,
+                  child: const LogoAnimation(),
+                ),
+                TextField(
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
                   ),
-                  const LogoAnimation(),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 60),
+                  controller: _webServerPath,
+                  keyboardType: TextInputType.name,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Doccano Server Path",
+                    hintText: 'Example: 192.168.1.2:8000',
                   ),
-                  TextField(
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                    controller: _username,
-                    keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your doccano username here',
-                    ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 30),
+                ),
+                TextField(
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 30),
+                  controller: _username,
+                  keyboardType: TextInputType.name,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Username",
+                    hintText: 'Enter your doccano username here',
                   ),
-                  TextField(
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                    controller: _password,
-                    obscureText: true,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your doccano password here',
-                    ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 30),
+                ),
+                TextField(
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 30),
+                  controller: _password,
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Password",
+                    hintText: 'Enter your doccano password here',
                   ),
-                  TextButton(
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 30),
+                ),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
                     onPressed: () async {
                       final username = _username.text;
                       final password = _password.text;
-
+                      final webserverPath = _webServerPath.text;
                       try {
                         if (await login(username, password)) {
                           if (!mounted) return;
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            projectsRoute,
-                            (route) => false,
-                          );
+                          prefs
+                              .setString("doccano_webserver_path",
+                                  "http://$webserverPath")
+                              .then((value) => {
+                                    Navigator.of(context)
+                                        .pushNamedAndRemoveUntil(
+                                      projectsRoute,
+                                      (route) => false,
+                                    )
+                                  });
                         }
                       } catch (e) {
-                        showErrorDialog(context, 'Wrong Credential');
+                        showErrorDialog(context, e.toString());
                       }
                     },
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all(
+                        const EdgeInsets.all(16.0),
+                      ),
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                    ),
                     child: const Text(
                       'Login',
                       style: TextStyle(
@@ -116,14 +143,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 50),
-                  ),
-                  const Text(
-                    'Remind to check the status of the doccano webserver',
-                  )
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

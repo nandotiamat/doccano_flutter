@@ -14,27 +14,9 @@ class GetStartedPage extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                child: Container(
-                    margin: const EdgeInsets.only(right: 25),
-                    child:
-                        Center(child: Image.asset('images/exoticdoccano.png'))),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 50),
-              ),
-              const Text(
-                'Mobile Client for Doccano!',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(top: 50),
-              ),
+              Center(child: Image.asset('images/exoticdoccano.png')),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, loginRoute);
@@ -50,14 +32,11 @@ class GetStartedPage extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Start using Doccano!!',
+                  'Start using Doccano!',
                   style: TextStyle(
                     fontSize: 20,
                   ),
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.only(bottom: 150),
               ),
             ],
           ),

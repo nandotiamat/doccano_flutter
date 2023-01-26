@@ -21,13 +21,8 @@ class _ValidationPageState extends State<ValidationPage> {
   late Future<ExampleMetadata?>? _future;
 
   Future<ExampleMetadata?>? getData() async {
-    if (dotenv.get("ENV") == "development") {
-      await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
-    }
-
     ExampleMetadata? metaData =
         await getExampleMetaData(Example.fromJson(widget.passedExample).id!);
-
     return metaData;
   }
 

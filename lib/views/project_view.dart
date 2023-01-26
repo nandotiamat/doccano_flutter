@@ -17,12 +17,7 @@ class _ProjectViewState extends State<ProjectView> {
   late Future<Project?>? _future;
 
   Future<Project?>? getData() async {
-    if (dotenv.get("ENV") == "development") {
-      await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
-    }
-
     Project? project = await getProject();
-
     return project;
   }
 
@@ -42,7 +37,7 @@ class _ProjectViewState extends State<ProjectView> {
 
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Welocome to Doccano'),
+              title: const Text('Welcome to Doccano'),
               automaticallyImplyLeading: false,
             ),
             body: SingleChildScrollView(

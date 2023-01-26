@@ -162,7 +162,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                               child: TextButton(
                                                 onPressed: () async {
                                                   await prefs.setInt(
-                                                      'PROJECT_ID',
+                                                      'project_id',
                                                       projects[index]!.id!);
                                                   // ignore: use_build_context_synchronously
                                                   Navigator.push(

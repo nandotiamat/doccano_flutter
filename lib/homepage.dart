@@ -31,9 +31,7 @@ class _HomepageState extends State<Homepage> {
   Label? selectedLabel;
 
   Future<Map<String, dynamic>> getData() async {
-    if (dotenv.get("ENV") == "development") {
-      await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
-    }
+
     List<Label> labels = await getLabels();
     // List<Example?>? examples = await getExamples('false', 0);
     List<Span>? spans = await getSpans(widget.example.id!);
@@ -236,7 +234,7 @@ class _HomepageState extends State<Homepage> {
 
             return Scaffold(
               appBar: AppBar(
-                title: const Text("Doccano Flutter"),
+                title: Text("Annotating Example ${widget.example.id}"),
               ),
               body: Column(
                 children: [
