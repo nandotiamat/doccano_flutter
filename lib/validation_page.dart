@@ -1,15 +1,21 @@
+import 'package:doccano_flutter/components/comment_widget.dart';
 import 'package:doccano_flutter/components/span_to_validate.dart';
+import 'package:doccano_flutter/components/validation_card.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/models/comment.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
+import 'package:doccano_flutter/utils/dont_ask_dialog.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:float_column/float_column.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'components/circular_progress_indicator_with_text.dart';
+
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 class ValidationPage extends StatefulWidget {
   const ValidationPage({Key? key, required this.passedExample})
@@ -26,7 +32,6 @@ class _ValidationPageState extends State<ValidationPage> {
   List<Span>? fetchedSpans;
   List<Label>? fetchedLabels;
   List<InlineSpan>? _spans;
-  List<SpanToValidate>? _spansToValidate;
 
   Future<ExampleMetadata?>? getData() async {
     if (dotenv.get("ENV") == "development") {
@@ -36,6 +41,8 @@ class _ValidationPageState extends State<ValidationPage> {
     List<Label> labels = await getLabels();
     List<Span>? spans = await getSpans(widget.passedExample.id!);
 
+    spans!.sort(((a, b) => a.startOffset.compareTo(b.startOffset)));
+
     ExampleMetadata? metaData = await getExampleMetaData(
         Example.fromJson(widget.passedExample.toJson()).id!);
 
@@ -44,8 +51,6 @@ class _ValidationPageState extends State<ValidationPage> {
       fetchedLabels = labels;
       _spans = [TextSpan(text: widget.passedExample.text)];
     });
-
-    getSpanToValidate();
 
     return metaData;
   }
@@ -58,8 +63,8 @@ class _ValidationPageState extends State<ValidationPage> {
 
   int offsetTextToShow = 40;
 
-  List<InlineSpan> getValidationText(Span span) {
-    List<List<InlineSpan>> result1 = _spans!.splitAtCharacterIndex(
+  List<InlineSpan> getValidationText(Span span, List<InlineSpan> text) {
+    List<List<InlineSpan>> result1 = text.splitAtCharacterIndex(
         SplitAtIndex(span.startOffset - offsetTextToShow));
     List<List<InlineSpan>> result2 = result1.last.splitAtCharacterIndex(
         SplitAtIndex(span.endOffset - span.startOffset + 2 * offsetTextToShow));
@@ -67,36 +72,13 @@ class _ValidationPageState extends State<ValidationPage> {
     return result2.first;
   }
 
-  void getSpanToValidate() {
-    List<SpanToValidate> list = [];
-    for (Span span in fetchedSpans!) {
-      Label label =
-          fetchedLabels!.firstWhere((label) => label.id == span.label);
-
-      //buildSpan(span);
-      List<InlineSpan> validationInlineSpan = getValidationText(span);
-
-      list.add(SpanToValidate(
-        inlineSpanList: validationInlineSpan,
-        label: label,
-      ));
-    }
-    updateTextSpan(list);
-
-    setState(() {
-      _spansToValidate = list;
-    });
-  }
-
-  void buildSpan(Span span) {
+  List<InlineSpan> buildSpan(Span span) {
     List<InlineSpan> temporarySpans = _spans!;
     Label spanLabel =
         fetchedLabels!.firstWhere((label) => label.id == span.label);
 
     final startIndex = span.startOffset;
     final endIndex = span.endOffset;
-    //debugPrint(
-    //    "${fetcexOf(span)} $span: $startIndex - $endIndex");
     final result1 =
         temporarySpans.splitAtCharacterIndex(SplitAtIndex(startIndex));
     final result2 =
@@ -117,18 +99,42 @@ class _ValidationPageState extends State<ValidationPage> {
       if (result2.length > 1) ...result2.last,
     ];
 
-    // setState(() {
-    //   _spans = temporarySpans;
-    // });
+    return getValidationText(span, temporarySpans);
   }
 
   @override
   Widget build(BuildContext context) {
     Example example = widget.passedExample;
     bool? checkBoxdontAskValue = false;
+    final CardSwiperController controller = CardSwiperController();
 
-    void saveCheckBoxValue() {
-      prefs.setBool("DELETE_SPAN", checkBoxdontAskValue!);
+    List<ValidationCard> cards = [
+      ...List.generate(fetchedSpans?.length ?? 0, (index) {
+        SpanToValidate spanToValidate = SpanToValidate(
+            inlineSpanList: buildSpan(fetchedSpans![index]),
+            label: fetchedLabels!
+                .firstWhere((label) => fetchedSpans![index].label == label.id));
+
+        updateTextSpan(spanToValidate);
+
+        return ValidationCard(spanToValidate: spanToValidate);
+      })
+    ];
+
+    // ignore: no_leading_underscores_for_local_identifiers
+    void _swipe(int index, CardSwiperDirection direction) async {
+      //ValidationCard lastCard = cards[index];
+
+      if (direction.name == 'top' || direction.name == 'right') {
+        print("the card was swiped to the: ${direction.name} with   $index");
+      }
+      if (direction.name == 'bottom' || direction.name == 'left') {
+        print("the card was swiped to the: ${direction.name} $index");
+        print(widget.passedExample.id!);
+        print(fetchedSpans![index].id);
+        //deleteSpan(widget.passedExample.id!, fetchedSpans![index].id);
+        //debugPrint("Span $index from example ${widget.passedExample.id} was successfully deleted.");
+      }
     }
 
     return Scaffold(
@@ -140,8 +146,6 @@ class _ValidationPageState extends State<ValidationPage> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               ExampleMetadata? metaData = snapshot.data;
-              List<Label>? labels = fetchedLabels;
-              List<Span>? spans = fetchedSpans;
 
               String commentString = metaData!.comment!;
               Map<String, dynamic> commentMap = {};
@@ -154,234 +158,71 @@ class _ValidationPageState extends State<ValidationPage> {
               Comment comment = Comment.fromJson(commentMap);
               comment.fixData();
 
-              int currentIndex = 0;
+              controller.swipeTop();
 
               return Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Card(
-                        elevation: 8,
-                        margin: const EdgeInsets.all(20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: _spansToValidate!.length,
-                                  itemBuilder: (context, index) {
-                                    buildSpan(fetchedSpans![index]);
-                                    return Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        children: [
-                                          RichText(
-                                            textScaleFactor: 2.0,
-                                            text: TextSpan(
-                                                style: const TextStyle(
-                                                    color: Colors.black),
-                                                children:
-                                                    _spansToValidate![index]
-                                                        .inlineSpanList),
-                                          ),
-                                          Transform(
-                                            transform: Matrix4.identity()
-                                              ..scale(1.4, 1.4),
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 32.0,
-                                                  top: 15,
-                                                  bottom: 15),
-                                              child: Chip(
-                                                materialTapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                                label: Text(
-                                                    _spansToValidate![index]
-                                                        .label
-                                                        .text!),
-                                                backgroundColor: Color(
-                                                    hexStringToInt(
-                                                        _spansToValidate![index]
-                                                            .label
-                                                            .backgroundColor!)),
-                                                labelStyle: TextStyle(
-                                                    color: Color(hexStringToInt(
-                                                        _spansToValidate![index]
-                                                            .label
-                                                            .textColor!))),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                top: 30.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                ElevatedButton(
-                                                  style: ElevatedButton.styleFrom(
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          50)),
-                                                      fixedSize:
-                                                          const Size(80, 50),
-                                                      backgroundColor:
-                                                          Colors.red),
-                                                  onPressed: () {
-                                                    (prefs.getBool(
-                                                            "DELETE_SPAN")!)
-                                                        ? "TODO elimina span"
-                                                        : showDialog(
-                                                            context: context,
-                                                            builder:
-                                                                ((context) {
-                                                              return AlertDialog(
-                                                                title: const Text(
-                                                                    'DELETING SPAN...'),
-                                                                content:
-                                                                    StatefulBuilder(
-                                                                  builder: (BuildContext
-                                                                          context,
-                                                                      StateSetter
-                                                                          setState) {
-                                                                    return SizedBox(
-                                                                      height:
-                                                                          120,
-                                                                      child:
-                                                                          Column(
-                                                                        children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Checkbox(
-                                                                                value: checkBoxdontAskValue,
-                                                                                onChanged: (value) {
-                                                                                  if (mounted) {
-                                                                                    setState(() {
-                                                                                      checkBoxdontAskValue = value!;
-                                                                                      saveCheckBoxValue();
-                                                                                    });
-                                                                                  }
-                                                                                },
-                                                                              ),
-                                                                              const Text('Dont Ask Anymore'),
-                                                                            ],
-                                                                          ),
-                                                                          const Padding(
-                                                                            padding:
-                                                                                EdgeInsets.only(top: 16.0),
-                                                                            child:
-                                                                                Text(
-                                                                              'You are deleting a span on this examples...are you SURE??',
-                                                                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    );
-                                                                  },
-                                                                ),
-                                                                actions: [
-                                                                  TextButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      Navigator.of(
-                                                                              context)
-                                                                          .pop();
-                                                                    },
-                                                                    child:
-                                                                        const Text(
-                                                                            'OK'),
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            }),
-                                                          );
-                                                  },
-                                                  child: const Text('NO'),
-                                                ),
-                                                ElevatedButton(
-                                                  style: ElevatedButton.styleFrom(
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          50)),
-                                                      fixedSize:
-                                                          const Size(80, 50),
-                                                      backgroundColor:
-                                                          Colors.green[300]),
-                                                  onPressed: () {},
-                                                  child: const Text('SI'),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Card(
-                      color: Colors.blue[500],
-                      elevation: 8,
-                      shadowColor: Colors.green,
-                      margin: const EdgeInsets.all(20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: SizedBox(
-                        height: 300,
-                        width: MediaQuery.of(context).size.width,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: comment
-                              .toJson()
-                              .entries
-                              .map((property) {
-                                return Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 16.0, top: 12.0),
-                                    child: Text(
-                                      '${property.key}: ${property.value}',
-                                      style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                  Flexible(
+                      child: CardSwiper(
+                    controller: controller,
+                    cards: cards,
+                    onSwipe: _swipe,
+                  )),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      //swipeRightButton(controller),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50)),
+                            fixedSize: const Size(80, 50),
+                            backgroundColor: Colors.red),
+                        onPressed: () {
+                          (prefs.getBool("DELETE_SPAN")!)
+                              ? controller.swipeLeft()
+                              : {
+                                  showDialog(
+                                    context: context,
+                                    builder: ((context) {
+                                      return DontAskDialog(
+                                        checkBoxdontAskValue:
+                                            checkBoxdontAskValue,
+                                        swipeController: controller,
+                                      );
+                                    }),
                                   ),
-                                );
-                              })
-                              .toList()
-                              .cast<Widget>(),
-                        ),
+                                };
+                        },
+                        child: Wrap(children: const <Widget>[
+                          Icon(
+                            Icons.close,
+                            color: CupertinoColors.white,
+                            size: 40,
+                          ),
+                        ]),
                       ),
-                    ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50)),
+                            fixedSize: const Size(80, 50),
+                            backgroundColor: CupertinoColors.activeGreen),
+                        onPressed: () {
+                          controller.swipeRight();
+                        },
+                        child: Wrap(children: const <Widget>[
+                          Icon(
+                            Icons.check,
+                            color: CupertinoColors.white,
+                            size: 40,
+                          ),
+                        ]),
+                      )
+                    ],
                   ),
+                  CommentWidget(comment: comment),
                 ],
               );
             } else if (snapshot.hasError) {
