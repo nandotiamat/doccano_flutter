@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 int hexStringToInt(String hexString) =>
     int.parse("0xFF${hexString.substring(1)}");
 
+//per non tagliare a metà parole nel testo mostrato in validation page
 void updateTextSpan(SpanToValidate spanToValidate) {
   spanToValidate.inlineSpanList.first =
       (spanToValidate.inlineSpanList.first as TextSpan).copyWith(
@@ -25,4 +26,11 @@ void updateTextSpan(SpanToValidate spanToValidate) {
               spanToValidate.inlineSpanList.last
                   .toPlainText()
                   .lastIndexOf(" ")));
+}
+
+void fixData(Map<String, dynamic> commentMap) {
+  if (commentMap.containsKey('data sentenza')) {
+    commentMap.update('data sentenza',
+        (value) => value.toString().substring(0, value.toString().length - 3));
+  }
 }

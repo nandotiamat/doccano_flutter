@@ -1,8 +1,6 @@
-import 'package:doccano_flutter/components/comment_widget.dart';
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/validation_card.dart';
 import 'package:doccano_flutter/globals.dart';
-import 'package:doccano_flutter/models/comment.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
@@ -108,35 +106,6 @@ class _ValidationPageState extends State<ValidationPage> {
     bool? checkBoxdontAskValue = false;
     final CardSwiperController controller = CardSwiperController();
 
-    List<ValidationCard> cards = [
-      ...List.generate(fetchedSpans?.length ?? 0, (index) {
-        SpanToValidate spanToValidate = SpanToValidate(
-            inlineSpanList: buildSpan(fetchedSpans![index]),
-            label: fetchedLabels!
-                .firstWhere((label) => fetchedSpans![index].label == label.id));
-
-        updateTextSpan(spanToValidate);
-
-        return ValidationCard(spanToValidate: spanToValidate);
-      })
-    ];
-
-    // ignore: no_leading_underscores_for_local_identifiers
-    void _swipe(int index, CardSwiperDirection direction) async {
-      //ValidationCard lastCard = cards[index];
-
-      if (direction.name == 'top' || direction.name == 'right') {
-        print("the card was swiped to the: ${direction.name} with   $index");
-      }
-      if (direction.name == 'bottom' || direction.name == 'left') {
-        print("the card was swiped to the: ${direction.name} $index");
-        print(widget.passedExample.id!);
-        print(fetchedSpans![index].id);
-        //deleteSpan(widget.passedExample.id!, fetchedSpans![index].id);
-        //debugPrint("Span $index from example ${widget.passedExample.id} was successfully deleted.");
-      }
-    }
-
     return Scaffold(
         appBar: AppBar(
           title: Text('Dataset ID: ${example.id}'),
@@ -155,74 +124,112 @@ class _ValidationPageState extends State<ValidationPage> {
                 commentMap[parts[0].trim()] = parts[1].trim();
               });
 
-              Comment comment = Comment.fromJson(commentMap);
-              comment.fixData();
+              fixData(commentMap);
 
-              controller.swipeTop();
+              List<ValidationCard> cards = [
+                ...List.generate(fetchedSpans?.length ?? 0, (index) {
+                  SpanToValidate spanToValidate = SpanToValidate(
+                      inlineSpanList: buildSpan(fetchedSpans![index]),
+                      label: fetchedLabels!.firstWhere(
+                          (label) => fetchedSpans![index].label == label.id));
+
+                  updateTextSpan(spanToValidate);
+
+                  return ValidationCard(
+                    spanToValidate: spanToValidate,
+                    commentMap: commentMap,
+                  );
+                })
+              ];
+
+              void _swipe(int index, CardSwiperDirection direction) async {
+                //ValidationCard lastCard = cards[index];
+
+                print(index);
+
+                if (direction.name == 'top' || direction.name == 'right') {
+                  print(
+                      "the card was swiped to the: ${direction.name} with   $index");
+                }
+                if (direction.name == 'bottom' || direction.name == 'left') {
+                  print("the card was swiped to the: ${direction.name} $index");
+                  print(widget.passedExample.id!);
+                  print(fetchedSpans![index].id);
+                  //deleteSpan(widget.passedExample.id!, fetchedSpans![index].id);
+                  //debugPrint("Span $index from example ${widget.passedExample.id} was successfully deleted.");
+                }
+              }
 
               return Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Flexible(
+                      flex: 1,
                       child: CardSwiper(
-                    controller: controller,
-                    cards: cards,
-                    onSwipe: _swipe,
-                  )),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      //swipeRightButton(controller),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50)),
-                            fixedSize: const Size(80, 50),
-                            backgroundColor: Colors.red),
-                        onPressed: () {
-                          (prefs.getBool("DELETE_SPAN")!)
-                              ? controller.swipeLeft()
-                              : {
-                                  showDialog(
-                                    context: context,
-                                    builder: ((context) {
-                                      return DontAskDialog(
-                                        checkBoxdontAskValue:
-                                            checkBoxdontAskValue,
-                                        swipeController: controller,
-                                      );
-                                    }),
-                                  ),
-                                };
-                        },
-                        child: Wrap(children: const <Widget>[
-                          Icon(
-                            Icons.close,
-                            color: CupertinoColors.white,
-                            size: 40,
+                        isDisabled: true,
+                        controller: controller,
+                        cards: cards,
+                        onSwipe: _swipe,
+                        onEnd: () {},
+                      )),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 250.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          //swipeRightButton(controller),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50)),
+                                fixedSize: const Size(80, 50),
+                                backgroundColor: Colors.red),
+                            onPressed: () {
+                              (prefs.getBool("DELETE_SPAN")!)
+                                  ? controller.swipeLeft()
+                                  : {
+                                      showDialog(
+                                        context: context,
+                                        builder: ((context) {
+                                          return DontAskDialog(
+                                            checkBoxdontAskValue:
+                                                checkBoxdontAskValue,
+                                            swipeController: controller,
+                                          );
+                                        }),
+                                      ),
+                                    };
+                            },
+                            child: Wrap(children: const <Widget>[
+                              Icon(
+                                Icons.close,
+                                color: CupertinoColors.white,
+                                size: 40,
+                              ),
+                            ]),
                           ),
-                        ]),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50)),
+                                fixedSize: const Size(80, 50),
+                                backgroundColor: Colors.green[300]),
+                            onPressed: () {
+                              controller.swipeRight();
+                            },
+                            child: Wrap(children: const <Widget>[
+                              Icon(
+                                Icons.check,
+                                color: CupertinoColors.white,
+                                size: 40,
+                              ),
+                            ]),
+                          )
+                        ],
                       ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50)),
-                            fixedSize: const Size(80, 50),
-                            backgroundColor: CupertinoColors.activeGreen),
-                        onPressed: () {
-                          controller.swipeRight();
-                        },
-                        child: Wrap(children: const <Widget>[
-                          Icon(
-                            Icons.check,
-                            color: CupertinoColors.white,
-                            size: 40,
-                          ),
-                        ]),
-                      )
-                    ],
+                    ),
                   ),
-                  CommentWidget(comment: comment),
+                  //CommentWidget(comment: comment),
                 ],
               );
             } else if (snapshot.hasError) {
