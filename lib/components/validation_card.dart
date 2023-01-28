@@ -12,7 +12,7 @@ class ValidationCard extends StatelessWidget {
         super(key: key);
 
   final SpanToValidate? _spanToValidate;
-  final Map<String, dynamic> commentMap;
+  final Map<String, dynamic>? commentMap;
 
   @override
   Widget build(BuildContext context) {
@@ -61,10 +61,10 @@ class ValidationCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    commentMap.containsKey(spanLabel)
+                    commentMap!.containsKey(spanLabel)
                         ? Flexible(
                             child: CommentWidget(
-                              commentLabel: commentMap[spanLabel],
+                              commentLabel: commentMap![spanLabel],
                               commentKey: spanLabel,
                             ),
                           )

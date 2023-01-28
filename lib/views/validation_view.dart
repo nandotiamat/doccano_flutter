@@ -53,62 +53,71 @@ class _ValidationView extends State<ValidationView> {
           if (snapshot.hasData) {
             List<Example?>? examples = snapshot.data;
 
-            return LayoutBuilder(builder: (context, constraint) {
-              return SingleChildScrollView(
-                controller: scrollController,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      child: Center(
-                        child: PaginatedDataTable(
-                          onPageChanged: (value) async {
-                            scrollController.jumpTo(0.0);
+            return RefreshIndicator(
+              onRefresh: () {
+                return Future.delayed(Duration(seconds: 1), () {
+                  setState(() {
+                    _future = getData();
+                  });
+                });
+              },
+              child: LayoutBuilder(builder: (context, constraint) {
+                return SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: PaginatedDataTable(
+                            onPageChanged: (value) async {
+                              scrollController.jumpTo(0.0);
 
-                            List<Example?>? fetchedExamples =
-                                await getExamples('true', offset);
-                            for (var example in fetchedExamples) {
-                              examples!.add(example);
-                            }
-                            setState(() {
-                              offset += 50;
-                            });
-                          },
-                          dataRowHeight: 90,
-                          columnSpacing: 50,
-                          horizontalMargin: 10,
-                          showCheckboxColumn: false,
-                          rowsPerPage: getRowsForPage(constraint),
-                          sortColumnIndex: 1,
-                          sortAscending: true,
-                          columns: const [
-                            DataColumn(
-                                label: Text(
-                              'ID',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            )),
-                            DataColumn(
-                                label: Text(
-                              'Text',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            )),
-                            DataColumn(
-                                label: Text(
-                              'Action',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            )),
-                          ],
-                          source: MyDataSource(examples, context),
+                              List<Example?>? fetchedExamples =
+                                  await getExamples('true', offset);
+                              for (var example in fetchedExamples) {
+                                examples!.add(example);
+                              }
+                              setState(() {
+                                offset += 50;
+                              });
+                            },
+                            dataRowHeight: 90,
+                            columnSpacing: 50,
+                            horizontalMargin: 10,
+                            showCheckboxColumn: false,
+                            rowsPerPage: getRowsForPage(constraint),
+                            sortColumnIndex: 1,
+                            sortAscending: true,
+                            columns: const [
+                              DataColumn(
+                                  label: Text(
+                                'ID',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                'Text',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              )),
+                              DataColumn(
+                                  label: Text(
+                                'Action',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              )),
+                            ],
+                            source: MyDataSource(examples, context),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            });
+                    ],
+                  ),
+                );
+              }),
+            );
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
           }
@@ -169,11 +178,10 @@ class MyDataSource extends DataTableSource {
         DataCell(TextButton(
           onPressed: () {
             Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      ValidationPage(passedExample: examples![index]!)),
-            );
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        ValidationPage(passedExample: examples![index]!)));
           },
           child: const Text(
             'Validate',

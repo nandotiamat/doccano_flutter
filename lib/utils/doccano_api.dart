@@ -155,3 +155,13 @@ Future<bool> deleteSpan(int exampleID, int spanID) async {
   }
   return false;
 }
+
+Future<void> unCheckExample(int exampleID) async {
+  int projectId = prefs.getInt("PROJECT_ID")!;
+
+  var response = await dio.post(
+      "$doccanoWS/v1/projects/$projectId/examples/$exampleID/states",
+      options: options,
+      data: {});
+  debugPrint(response.statusCode.toString());
+}

@@ -1,12 +1,15 @@
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/validation_card.dart';
+import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/globals.dart';
+import 'package:doccano_flutter/menu_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:doccano_flutter/utils/dont_ask_dialog.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
+import 'package:doccano_flutter/views/validation_view.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +33,8 @@ class _ValidationPageState extends State<ValidationPage> {
   List<Span>? fetchedSpans;
   List<Label>? fetchedLabels;
   List<InlineSpan>? _spans;
+
+  late bool endOfCards;
 
   Future<ExampleMetadata?>? getData() async {
     if (dotenv.get("ENV") == "development") {
@@ -55,6 +60,7 @@ class _ValidationPageState extends State<ValidationPage> {
 
   @override
   void initState() {
+    endOfCards = false;
     super.initState();
     _future = getData();
   }
@@ -109,6 +115,14 @@ class _ValidationPageState extends State<ValidationPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Dataset ID: ${example.id}'),
+          leading: BackButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const MenuPage()));
+            },
+          ),
         ),
         body: FutureBuilder(
           future: _future,
@@ -145,8 +159,6 @@ class _ValidationPageState extends State<ValidationPage> {
               void _swipe(int index, CardSwiperDirection direction) async {
                 //ValidationCard lastCard = cards[index];
 
-                print(index);
-
                 if (direction.name == 'top' || direction.name == 'right') {
                   print(
                       "the card was swiped to the: ${direction.name} with   $index");
@@ -157,6 +169,9 @@ class _ValidationPageState extends State<ValidationPage> {
                   print(fetchedSpans![index].id);
                   //deleteSpan(widget.passedExample.id!, fetchedSpans![index].id);
                   //debugPrint("Span $index from example ${widget.passedExample.id} was successfully deleted.");
+                  if (widget.passedExample.isConfirmed == true) {
+                    await unCheckExample(widget.passedExample.id!);
+                  }
                 }
               }
 
@@ -164,71 +179,116 @@ class _ValidationPageState extends State<ValidationPage> {
                 children: [
                   Flexible(
                       flex: 1,
-                      child: CardSwiper(
-                        isDisabled: true,
-                        controller: controller,
-                        cards: cards,
-                        onSwipe: _swipe,
-                        onEnd: () {},
-                      )),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 250.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          //swipeRightButton(controller),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50)),
-                                fixedSize: const Size(80, 50),
-                                backgroundColor: Colors.red),
-                            onPressed: () {
-                              (prefs.getBool("DELETE_SPAN")!)
-                                  ? controller.swipeLeft()
-                                  : {
-                                      showDialog(
-                                        context: context,
-                                        builder: ((context) {
-                                          return DontAskDialog(
-                                            checkBoxdontAskValue:
-                                                checkBoxdontAskValue,
-                                            swipeController: controller,
-                                          );
-                                        }),
+                      child: (endOfCards
+                          ? Column(
+                              children: [
+                                Image.asset('images/exoticdoccano.png'),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 80.0),
+                                  child: Center(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50),
+                                        ),
+                                        fixedSize: const Size(150, 70),
+                                        backgroundColor: Colors.green[400],
                                       ),
-                                    };
-                            },
-                            child: Wrap(children: const <Widget>[
-                              Icon(
-                                Icons.close,
-                                color: CupertinoColors.white,
-                                size: 40,
-                              ),
-                            ]),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const MenuPage()));
+                                      },
+                                      child: const Text(
+                                        'FINE',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : CardSwiper(
+                              isDisabled: false,
+                              controller: controller,
+                              cards: cards,
+                              onSwipe: _swipe,
+                              onEnd: () {
+                                setState(() {
+                                  endOfCards = true;
+                                });
+                              },
+                            ))),
+
+                  (endOfCards
+                      ? const SizedBox()
+                      : Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 250.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                //swipeRightButton(controller),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50)),
+                                      fixedSize: const Size(80, 50),
+                                      backgroundColor: Colors.red),
+                                  onPressed: () {
+                                    (prefs.getBool("DELETE_SPAN")!)
+                                        ? controller.swipeLeft()
+                                        : {
+                                            showDialog(
+                                              context: context,
+                                              builder: ((context) {
+                                                return DontAskDialog(
+                                                  checkBoxdontAskValue:
+                                                      checkBoxdontAskValue,
+                                                  swipeController: controller,
+                                                );
+                                              }),
+                                            ),
+                                          };
+                                  },
+                                  child: Wrap(children: const <Widget>[
+                                    Icon(
+                                      Icons.close,
+                                      color: CupertinoColors.white,
+                                      size: 40,
+                                    ),
+                                  ]),
+                                ),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(50)),
+                                      fixedSize: const Size(80, 50),
+                                      backgroundColor: Colors.green[300]),
+                                  onPressed: () {
+                                    controller.swipeRight();
+                                  },
+                                  child: Wrap(children: const <Widget>[
+                                    Icon(
+                                      Icons.check,
+                                      color: CupertinoColors.white,
+                                      size: 40,
+                                    ),
+                                  ]),
+                                )
+                              ],
+                            ),
                           ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(50)),
-                                fixedSize: const Size(80, 50),
-                                backgroundColor: Colors.green[300]),
-                            onPressed: () {
-                              controller.swipeRight();
-                            },
-                            child: Wrap(children: const <Widget>[
-                              Icon(
-                                Icons.check,
-                                color: CupertinoColors.white,
-                                size: 40,
-                              ),
-                            ]),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
+                        )),
                   //CommentWidget(comment: comment),
                 ],
               );
