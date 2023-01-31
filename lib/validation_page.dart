@@ -1,6 +1,7 @@
+import 'dart:convert';
+
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/validation_card.dart';
-import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/menu_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
@@ -9,9 +10,7 @@ import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:doccano_flutter/utils/dont_ask_dialog.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
-import 'package:doccano_flutter/views/validation_view.dart';
 import 'package:float_column/float_column.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'components/circular_progress_indicator_with_text.dart';
@@ -61,8 +60,13 @@ class _ValidationPageState extends State<ValidationPage> {
   @override
   void initState() {
     endOfCards = false;
+    getValidatedSpans();
     super.initState();
     _future = getData();
+  }
+
+  getValidatedSpans() async {
+    //validatedSpan = json.decode(prefs.get('validatedSpan').toString()) ?? [];
   }
 
   int offsetTextToShow = 40;
@@ -112,9 +116,12 @@ class _ValidationPageState extends State<ValidationPage> {
     bool? checkBoxdontAskValue = false;
     final CardSwiperController controller = CardSwiperController();
 
+    List<Span> validatingSpans = [];
+    List<Span> deletingSpans = [];
+
     return Scaffold(
         appBar: AppBar(
-          title: Text('Dataset ID: ${example.id}'),
+          title: Text('Example ID: ${example.id}'),
           leading: BackButton(
             onPressed: () {
               Navigator.pop(context);
@@ -156,26 +163,35 @@ class _ValidationPageState extends State<ValidationPage> {
                 })
               ];
 
-              void _swipe(int index, CardSwiperDirection direction) async {
-                //ValidationCard lastCard = cards[index];
+              void swipe(int index, CardSwiperDirection direction) async {
+                //NON INSERIRE SET STATE QUI SENO MUORE LO SWIPE COI BOTTONI
 
-                if (direction.name == 'top' || direction.name == 'right') {
+                if (direction.name == 'right') {
                   print(
                       "the card was swiped to the: ${direction.name} with   $index");
+
+                  validatingSpans.add(fetchedSpans![index]);
                 }
-                if (direction.name == 'bottom' || direction.name == 'left') {
+                if (direction.name == 'left') {
                   print("the card was swiped to the: ${direction.name} $index");
                   print(widget.passedExample.id!);
                   print(fetchedSpans![index].id);
+
+                  deletingSpans.add(fetchedSpans![index]);
                   //deleteSpan(widget.passedExample.id!, fetchedSpans![index].id);
                   //debugPrint("Span $index from example ${widget.passedExample.id} was successfully deleted.");
                   if (widget.passedExample.isConfirmed == true) {
-                    await unCheckExample(widget.passedExample.id!);
+                    //await unCheckExample(widget.passedExample.id!);
                   }
                 }
+
+                if (direction.name == 'top') {}
+
+                if (direction.name == 'bottom') {}
               }
 
               return Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
                       flex: 1,
@@ -219,10 +235,12 @@ class _ValidationPageState extends State<ValidationPage> {
                               isDisabled: false,
                               controller: controller,
                               cards: cards,
-                              onSwipe: _swipe,
+                              onSwipe: swipe,
                               onEnd: () {
                                 setState(() {
                                   endOfCards = true;
+
+                                  //validatedSpan = validatingSpans;prefs.setString("validatedSpan",json.encode(validatedSpan));
                                 });
                               },
                             ))),
@@ -230,19 +248,15 @@ class _ValidationPageState extends State<ValidationPage> {
                   (endOfCards
                       ? const SizedBox()
                       : Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 250.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                //swipeRightButton(controller),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(50)),
-                                      fixedSize: const Size(80, 50),
-                                      backgroundColor: Colors.red),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              //swipeRightButton(controller),
+
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.red,
+                                child: IconButton(
                                   onPressed: () {
                                     (prefs.getBool("DELETE_SPAN")!)
                                         ? controller.swipeLeft()
@@ -259,34 +273,42 @@ class _ValidationPageState extends State<ValidationPage> {
                                             ),
                                           };
                                   },
-                                  child: Wrap(children: const <Widget>[
-                                    Icon(
-                                      Icons.close,
-                                      color: CupertinoColors.white,
-                                      size: 40,
-                                    ),
-                                  ]),
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                  ),
                                 ),
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(50)),
-                                      fixedSize: const Size(80, 50),
-                                      backgroundColor: Colors.green[300]),
+                              ),
+
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.grey,
+                                child: IconButton(
+                                  onPressed: () {
+                                    controllerRandomTopBottom(controller);
+                                  },
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.green[300],
+                                child: IconButton(
                                   onPressed: () {
                                     controller.swipeRight();
                                   },
-                                  child: Wrap(children: const <Widget>[
-                                    Icon(
-                                      Icons.check,
-                                      color: CupertinoColors.white,
-                                      size: 40,
-                                    ),
-                                  ]),
-                                )
-                              ],
-                            ),
+                                  icon: const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         )),
                   //CommentWidget(comment: comment),
