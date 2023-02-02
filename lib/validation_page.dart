@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'components/circular_progress_indicator_with_text.dart';
 
@@ -62,7 +59,6 @@ class _ValidationPageState extends State<ValidationPage> {
               }
 
               Map<String, dynamic> commentMap = parseString(stringToParse);
-              print(commentMap);
 
               return Column(
                 children: [

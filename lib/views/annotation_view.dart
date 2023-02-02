@@ -3,7 +3,6 @@ import 'package:doccano_flutter/homepage.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../constants/get_rows_for_page.dart';
 
 class AnnotationView extends StatefulWidget {

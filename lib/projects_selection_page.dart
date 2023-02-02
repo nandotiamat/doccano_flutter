@@ -20,7 +20,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
   Future<List<Project?>?> getData() async {
     if (dotenv.get("ENV") == "development") {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
-    }
+  }
     List<Project?>? projects = await getProjects();
 
     return projects;

@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/models/projects.dart';
 import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/views/project_view.dart';
 import 'package:doccano_flutter/views/validation_view.dart';
@@ -21,6 +22,10 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    final Project project =
+        ModalRoute.of(context)!.settings.arguments as Project;
+    debugPrint("Allow-Overlapping : ${project.allowOverlapping.toString()}");
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(

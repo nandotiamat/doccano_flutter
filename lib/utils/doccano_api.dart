@@ -6,7 +6,6 @@ import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/models/projects.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<bool> login(String username, String password) async {
   var dataLogin = {"username": username, "password": password};
@@ -25,7 +24,8 @@ Future<bool> login(String username, String password) async {
 }
 
 Future<List<Label>> getLabels() async {
-  var response = await dio.get("${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/span-types",
+  var response = await dio.get(
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/span-types",
       options: options);
   List<Label> labels = [];
 
@@ -40,13 +40,15 @@ Future<List<Example?>> getExamples(String confirmed, int offset) async {
     "confirmed": confirmed,
     "offset": offset
   };
-  
+
   List<Example>? examples = [];
-    var response = await dio.get("${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples",
-        options: options, queryParameters: params);
-    response.data["results"]
-        .forEach((example) => examples.add(Example.fromJson(example)));
-    return examples;
+  var response = await dio.get(
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples",
+      options: options,
+      queryParameters: params);
+  response.data["results"]
+      .forEach((example) => examples.add(Example.fromJson(example)));
+  return examples;
 }
 
 Future<ExampleMetadata?>? getExampleMetaData(int exampleId) async {
@@ -60,7 +62,6 @@ Future<ExampleMetadata?>? getExampleMetaData(int exampleId) async {
 }
 
 Future<List<Project?>?> getProjects() async {
-  print(options);
   String filter = 'created_at';
   Map<String, dynamic> params = {"ordering": filter};
   var response = await dio.get("${getDoccanoWebServerPath()}/v1/projects",
@@ -74,8 +75,9 @@ Future<List<Project?>?> getProjects() async {
 }
 
 Future<Project?>? getProject() async {
-  var response =
-      await dio.get("${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}", options: options);
+  var response = await dio.get(
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}",
+      options: options);
   if (response.statusCode == 200) {
     return Project.fromJson(response.data);
   }
@@ -85,7 +87,8 @@ Future<Project?>? getProject() async {
 Future<void> deleteProject(int projectId) async {
   try {
     await dio
-        .delete("${getDoccanoWebServerPath()}/v1/projects/$projectID", options: options)
+        .delete("${getDoccanoWebServerPath()}/v1/projects/$projectID",
+            options: options)
         .timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint(e.toString());

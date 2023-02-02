@@ -4,7 +4,6 @@ import 'package:doccano_flutter/views/labels_view.dart';
 import 'package:doccano_flutter/models/projects.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProjectView extends StatefulWidget {
   const ProjectView({super.key});
