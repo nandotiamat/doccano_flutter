@@ -13,6 +13,7 @@ import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'components/circular_progress_indicator_with_text.dart';
 
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -63,10 +64,14 @@ class _ValidationPageState extends State<ValidationPage> {
     getValidatedSpans();
     super.initState();
     _future = getData();
+    var box = Hive.openBox("PAOLO").then(
+        (box) => print("Apro la box da validation page ${box.get("name")}"));
   }
 
+  List<Span>? validatedSpan;
+
   getValidatedSpans() async {
-    //validatedSpan = json.decode(prefs.get('validatedSpan').toString()) ?? [];
+    validatedSpan = json.decode(prefs.get('validatedSpan').toString()) ?? [];
   }
 
   int offsetTextToShow = 40;

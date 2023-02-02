@@ -7,9 +7,16 @@ import 'package:doccano_flutter/projects_selection_page.dart';
 import 'package:doccano_flutter/views/validation_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive_flutter/adapters.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+
+  var box = await Hive.openBox("PAOLO");
+  //box.put("name", "paolo");
+  print("Leggo dalla box: ${box.get("name")}");
   await dotenv.load(fileName: ".env");
   initGlobals();
   runApp(const DoccanoFlutter());

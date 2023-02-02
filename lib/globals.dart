@@ -17,6 +17,5 @@ void initGlobals() async {
 
   projectID = dotenv.get("PROJECT_ID");
   doccanoWS = dotenv.get("DOCCANO_WEBSERVER_PATH");
-
   dio = Dio();
 }

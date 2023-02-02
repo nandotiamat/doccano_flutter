@@ -4,34 +4,54 @@
 
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
+
 Span spanFromJson(String str) => Span.fromJson(json.decode(str));
 
 String spanToJson(Span data) => json.encode(data.toJson());
 
+@HiveType(typeId: 1)
 class Span {
-    Span({
-        required this.id,
-        required this.prob,
-        required this.user,
-        required this.example,
-        required this.createdAt,
-        required this.updatedAt,
-        required this.label,
-        required this.startOffset,
-        required this.endOffset,
-    });
+  Span({
+    required this.id,
+    required this.prob,
+    required this.user,
+    required this.example,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.label,
+    required this.startOffset,
+    required this.endOffset,
+  });
 
-    int id;
-    double prob;
-    int user;
-    int example;
-    DateTime createdAt;
-    DateTime updatedAt;
-    int label;
-    int startOffset;
-    int endOffset;
+  @HiveField(0)
+  int id;
 
-    factory Span.fromJson(Map<String, dynamic> json) => Span(
+  @HiveField(1)
+  double prob;
+
+  @HiveField(2)
+  int user;
+
+  @HiveField(3)
+  int example;
+
+  @HiveField(4)
+  DateTime createdAt;
+
+  @HiveField(5)
+  DateTime updatedAt;
+
+  @HiveField(6)
+  int label;
+
+  @HiveField(7)
+  int startOffset;
+
+  @HiveField(8)
+  int endOffset;
+
+  factory Span.fromJson(Map<String, dynamic> json) => Span(
         id: json["id"],
         prob: json["prob"],
         user: json["user"],
@@ -41,9 +61,9 @@ class Span {
         label: json["label"],
         startOffset: json["start_offset"],
         endOffset: json["end_offset"],
-    );
+      );
 
-    Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => {
         "id": id,
         "prob": prob,
         "user": user,
@@ -53,5 +73,5 @@ class Span {
         "label": label,
         "start_offset": startOffset,
         "end_offset": endOffset,
-    };
+      };
 }
