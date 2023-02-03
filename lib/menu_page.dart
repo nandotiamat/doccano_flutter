@@ -1,4 +1,3 @@
-import 'package:doccano_flutter/models/projects.dart';
 import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/views/project_view.dart';
 import 'package:doccano_flutter/views/validation_view.dart';
@@ -22,37 +21,30 @@ class _MenuPageState extends State<MenuPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Project project =
-        ModalRoute.of(context)!.settings.arguments as Project;
-    debugPrint("Allow-Overlapping : ${project.allowOverlapping.toString()}");
-
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
-          children: const [
-            ProjectView(),
-            AnnotationView(),
-            ValidationView(),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Project',
-            ),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.new_label_outlined), label: 'Annotate'),
-            BottomNavigationBarItem(
-                icon: Icon(Icons.check_circle_outline), label: 'Validate'),
-          ],
-          currentIndex: _currentIndex,
-          selectedItemColor: Colors.blue,
-          onTap: _onItemTapped,
-        ),
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: const [
+          ProjectView(),
+          AnnotationView(),
+          ValidationView(),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Project',
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.new_label_outlined), label: 'Annotate'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.check_circle_outline), label: 'Validate'),
+        ],
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
       ),
     );
   }

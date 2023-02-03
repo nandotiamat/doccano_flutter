@@ -101,7 +101,6 @@ Future<List<Span>?> getSpans(int exampleID) async {
       options: options);
   List<Span>? fetchedSpans = [];
   if (response.data == null) return null;
-  debugPrint(response.data!.length.toString());
   if (response.data == []) return [];
   for (var span in response.data!) {
     fetchedSpans.add(Span.fromJson(span));
@@ -144,4 +143,14 @@ Future<bool> deleteSpan(int exampleID, int spanID) async {
     return true;
   }
   return false;
+}
+
+Future<void> unCheckExample(int exampleID) async {
+  int projectId = prefs.getInt("PROJECT_ID")!;
+
+  var response = await dio.post(
+      "$doccanoWS/v1/projects/$projectId/examples/$exampleID/states",
+      options: options,
+      data: {});
+  debugPrint(response.statusCode.toString());
 }

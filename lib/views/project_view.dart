@@ -37,7 +37,6 @@ class _ProjectViewState extends State<ProjectView> {
           return Scaffold(
             appBar: AppBar(
               title: const Text('Welcome to Doccano'),
-              automaticallyImplyLeading: false,
             ),
             body: SingleChildScrollView(
               child: Column(
