@@ -1,3 +1,5 @@
+import 'package:doccano_flutter/components/span_to_validate.dart';
+import 'package:doccano_flutter/components/user_data.dart';
 import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/get_started_page.dart';
@@ -7,9 +9,17 @@ import 'package:doccano_flutter/projects_selection_page.dart';
 import 'package:doccano_flutter/views/validation_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+
+  await Hive.openBox('UTENTI');
+  Hive.registerAdapter(UserDataAdapter());
+  Hive.registerAdapter(SpanToValidateAdapter());
+
   await dotenv.load(fileName: ".env");
   await initGlobals();
   runApp(const DoccanoFlutter());
