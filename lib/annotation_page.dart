@@ -24,6 +24,7 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  PanelController panelController = PanelController();
   List<SpanCluster> spanClusters = [];
   List<Span>? fetchedSpans;
   List<Label>? fetchedLabels;
@@ -237,7 +238,10 @@ class _HomepageState extends State<Homepage> {
                           textScaleFactor: 2.00,
                         ),
                       ),
-                panel: Center(child: LabelsWrap(labels, updateSelectedLabel)),
+                panel: Center(
+                  child: LabelsWrap(labels, updateSelectedLabel,
+                      panelController: panelController),
+                ),
                 body: SingleChildScrollView(
                   child: Selectable(
                     popupMenuItems: [
@@ -265,6 +269,11 @@ class _HomepageState extends State<Homepage> {
                     ),
                   ),
                 ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24.0),
+                  topRight: Radius.circular(24.0),
+                ),
+                controller: panelController,
               ),
             );
           }
