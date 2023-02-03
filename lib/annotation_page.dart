@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/globals.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:selectable/selectable.dart';
@@ -31,6 +32,7 @@ class _HomepageState extends State<Homepage> {
   List<InlineSpan>? _spans;
   List<InlineSpan>? _vanillaTextSpans;
   late Future<Map<String, dynamic>> _future;
+  bool? allowOverlapping = prefs.getBool("allow_overlapping");
   Label? selectedLabel;
 
   Future<Map<String, dynamic>> getData() async {
@@ -249,7 +251,50 @@ class _HomepageState extends State<Homepage> {
                       SelectableMenuItem(
                         icon: Icons.add,
                         title: 'Add label',
-                        isEnabled: (controller) => controller!.isTextSelected,
+                        isEnabled: (controller) {
+                          if (!allowOverlapping!) {
+                            final selection = controller?.getSelection();
+                            final startIndex = selection?.startIndex;
+                            final endIndex = selection?.endIndex;
+                            if (selection != null &&
+                                startIndex != null &&
+                                endIndex != null &&
+                                endIndex > startIndex) {
+                              for (SpanCluster cluster in spanClusters) {
+                                int numberOfPreviousWidgetSpan =
+                                    _spans!.where((element) {
+                                  if (element.runtimeType == LabelWidgetSpan) {
+                                    return (element as LabelWidgetSpan)
+                                            .label
+                                            .endOffset <
+                                        startIndex;
+                                  }
+                                  return false;
+                                }).length;
+                                int newStartIndex =
+                                    startIndex - numberOfPreviousWidgetSpan;
+                                int newEndIndex =
+                                    endIndex - numberOfPreviousWidgetSpan;
+
+                                bool overlap =
+                                    ((cluster.startIndex < newStartIndex &&
+                                            newStartIndex < cluster.endIndex) ||
+                                        (cluster.startIndex < newEndIndex &&
+                                            newStartIndex < cluster.endIndex) ||
+                                        (newStartIndex < cluster.startIndex &&
+                                            newEndIndex > cluster.endIndex));
+
+                                if (overlap) {
+                                  print(
+                                      "CLUSTER OVERLAPPED : ${cluster.startIndex} ${cluster.endIndex} ${newStartIndex} ${newEndIndex} ");
+                                  return false;
+                                }
+                              }
+                            }
+                          }
+
+                          return controller!.isTextSelected;
+                        },
                         handler: handlerAddSpanController,
                       ),
                     ],
