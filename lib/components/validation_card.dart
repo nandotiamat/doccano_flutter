@@ -8,11 +8,13 @@ class ValidationCard extends StatelessWidget {
     Key? key,
     required SpanToValidate? spanToValidate,
     required this.commentMap,
+    this.inlineSpanList,
   })  : _spanToValidate = spanToValidate,
         super(key: key);
 
   final SpanToValidate? _spanToValidate;
   final Map<String, dynamic>? commentMap;
+  final List<InlineSpan>? inlineSpanList;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +42,7 @@ class ValidationCard extends StatelessWidget {
                           style: const TextStyle(
                             color: Colors.black,
                           ),
-                          children: _spanToValidate?.inlineSpanList),
+                          children: inlineSpanList),
                     ),
                     SizedBox(
                       child: Transform(

@@ -9,16 +9,16 @@ part '../hive models/span_to_validate.g.dart';
 class SpanToValidate {
   const SpanToValidate({
     required this.label,
-    required this.inlineSpanList,
     required this.span,
+    required this.validated,
   });
 
   @HiveField(0)
-  final List<InlineSpan> inlineSpanList;
-
-  @HiveField(1)
   final Label label;
 
-  @HiveField(2)
+  @HiveField(1)
   final Span span;
+
+  @HiveField(2)
+  final bool validated;
 }

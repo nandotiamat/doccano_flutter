@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/user_data.dart';
 import 'package:doccano_flutter/components/validation_card.dart';
@@ -63,15 +62,15 @@ class _ValidationPageState extends State<ValidationPage> {
   @override
   void initState() {
     endOfCards = false;
-    getValidatedSpans();
+    openBox();
     super.initState();
     _future = getData();
   }
 
-  List<Span>? validatedSpan;
-
-  getValidatedSpans() async {
-    validatedSpan = json.decode(prefs.get('validatedSpan').toString()) ?? [];
+  void openBox() async {
+    var boxUsers = await Hive.openBox('UTENTI');
+    print(
+        'apro la box da validation page allo start -> ${boxUsers.get('Examples').examples}');
   }
 
   int offsetTextToShow = 40;
@@ -135,14 +134,8 @@ class _ValidationPageState extends State<ValidationPage> {
               onPressed: () async {
                 var boxUsers = await Hive.openBox('UTENTI');
 
-                boxUsers.put(
-                    'Examples',
-                    UserData(examples: {
-                      widget.passedExample.id.toString(): spansToValidate
-                    }));
-
                 print(
-                    'apro la box da validation page -> ${boxUsers.get('Examples')}');
+                    'apro la box da validation page -> ${boxUsers.get('Examples').examples}');
 
                 // ignore: use_build_context_synchronously
                 Navigator.pop(context);
@@ -172,24 +165,31 @@ class _ValidationPageState extends State<ValidationPage> {
 
                 List<ValidationCard> cards = [
                   ...List.generate(fetchedSpans?.length ?? 0, (index) {
+                    List<InlineSpan> inlineSpanList =
+                        buildSpan(fetchedSpans![index]);
+
                     SpanToValidate spanToValidate = SpanToValidate(
-                        inlineSpanList: buildSpan(fetchedSpans![index]),
                         span: fetchedSpans![index],
                         label: fetchedLabels!.firstWhere(
-                            (label) => fetchedSpans![index].label == label.id));
+                            (label) => fetchedSpans![index].label == label.id),
+                        validated: false);
 
-                    updateTextSpan(spanToValidate);
-                    spansToValidate!.add(spanToValidate);
+                    updateTextSpan(inlineSpanList);
 
                     return ValidationCard(
                       spanToValidate: spanToValidate,
                       commentMap: commentMap,
+                      inlineSpanList: inlineSpanList,
                     );
                   })
                 ];
 
                 void swipe(int index, CardSwiperDirection direction) async {
-                  //NON INSERIRE SET STATE QUI SENO MUORE LO SWIPE COI BOTTONI
+                  SpanToValidate spanToValidate = SpanToValidate(
+                      span: fetchedSpans![index],
+                      label: fetchedLabels!.firstWhere(
+                          (label) => fetchedSpans![index].label == label.id),
+                      validated: false);
 
                   if (direction.name == 'right') {
                     print(
@@ -209,11 +209,17 @@ class _ValidationPageState extends State<ValidationPage> {
                     if (widget.passedExample.isConfirmed == true) {
                       //await unCheckExample(widget.passedExample.id!);
                     }
+
+                    spansToValidate!.add(spanToValidate);
                   }
 
-                  if (direction.name == 'top') {}
+                  if (direction.name == 'top') {
+                    spansToValidate!.add(spanToValidate);
+                  }
 
-                  if (direction.name == 'bottom') {}
+                  if (direction.name == 'bottom') {
+                    spansToValidate!.add(spanToValidate);
+                  }
                 }
 
                 return Column(
@@ -262,12 +268,22 @@ class _ValidationPageState extends State<ValidationPage> {
                                 controller: controller,
                                 cards: cards,
                                 onSwipe: swipe,
-                                onEnd: () {
+                                onEnd: () async {
                                   setState(() {
                                     endOfCards = true;
-
-                                    //validatedSpan = validatingSpans;prefs.setString("validatedSpan",json.encode(validatedSpan));
                                   });
+
+                                  var boxUsers = await Hive.openBox('UTENTI');
+
+                                  boxUsers.put(
+                                      'Examples',
+                                      UserData(examples: {
+                                        widget.passedExample.id.toString():
+                                            spansToValidate
+                                      }));
+
+                                  print(
+                                      'apro la box da validation page onEnd-> ${boxUsers.get('Examples').examples}');
                                 },
                               ))),
 

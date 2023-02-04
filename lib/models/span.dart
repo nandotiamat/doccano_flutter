@@ -4,10 +4,15 @@
 
 import 'dart:convert';
 
+import 'package:hive_flutter/hive_flutter.dart';
+
+part '../hive models/span.g.dart';
+
 Span spanFromJson(String str) => Span.fromJson(json.decode(str));
 
 String spanToJson(Span data) => json.encode(data.toJson());
 
+@HiveType(typeId: 3)
 class Span {
   Span({
     required this.id,
@@ -21,14 +26,31 @@ class Span {
     required this.endOffset,
   });
 
+  @HiveField(0)
   int id;
+
+  @HiveField(1)
   double prob;
+
+  @HiveField(2)
   int user;
+
+  @HiveField(3)
   int example;
+
+  @HiveField(4)
   DateTime createdAt;
+
+  @HiveField(5)
   DateTime updatedAt;
+
+  @HiveField(6)
   int label;
+
+  @HiveField(7)
   int startOffset;
+
+  @HiveField(8)
   int endOffset;
 
   factory Span.fromJson(Map<String, dynamic> json) => Span(
