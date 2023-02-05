@@ -22,61 +22,56 @@ class ValidationCard extends StatelessWidget {
 
     return Card(
       elevation: 8,
-      margin: const EdgeInsets.all(16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    RichText(
-                      textScaleFactor: 2.0,
-                      text: TextSpan(
-                          style: const TextStyle(
-                            color: Colors.black,
-                          ),
-                          children: inlineSpanList),
-                    ),
-                    SizedBox(
-                      child: Transform(
-                        transform: Matrix4.identity()..scale(1.4, 1.4),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              right: 32.0, top: 15, bottom: 15),
-                          child: Chip(
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                            label: Text(_spanToValidate!.label.text!),
-                            backgroundColor: Color(hexStringToInt(
-                                _spanToValidate!.label.backgroundColor!)),
-                            labelStyle: TextStyle(
-                                color: Color(hexStringToInt(
-                                    _spanToValidate!.label.textColor!))),
-                          ),
+      margin: const EdgeInsets.all(12.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  RichText(
+                    textScaleFactor: 1.9,
+                    text: TextSpan(
+                        style: const TextStyle(
+                          color: Colors.black,
+                        ),
+                        children: inlineSpanList),
+                  ),
+                  SizedBox(
+                    child: Transform(
+                      transform: Matrix4.identity()..scale(1.4, 1.4),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            right: 32.0, top: 15, bottom: 15),
+                        child: Chip(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          label: Text(_spanToValidate!.label.text!),
+                          backgroundColor: Color(hexStringToInt(
+                              _spanToValidate!.label.backgroundColor!)),
+                          labelStyle: TextStyle(
+                              color: Color(hexStringToInt(
+                                  _spanToValidate!.label.textColor!))),
                         ),
                       ),
                     ),
-                    commentMap!.containsKey(spanLabel)
-                        ? Flexible(
-                            child: CommentWidget(
-                              commentLabel: commentMap![spanLabel],
-                              commentKey: spanLabel,
-                            ),
-                          )
-                        : const Text(''),
-                  ],
-                ),
+                  ),
+                  commentMap!.containsKey(spanLabel)
+                      ? Flexible(
+                          child: CommentWidget(
+                            commentLabel: commentMap![spanLabel],
+                            commentKey: spanLabel,
+                          ),
+                        )
+                      : const Text(''),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

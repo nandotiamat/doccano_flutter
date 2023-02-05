@@ -7,7 +7,7 @@ part '../hive models/span_to_validate.g.dart';
 
 @HiveType(typeId: 1)
 class SpanToValidate {
-  const SpanToValidate({
+  SpanToValidate({
     required this.label,
     required this.span,
     required this.validated,
@@ -20,5 +20,5 @@ class SpanToValidate {
   final Span span;
 
   @HiveField(2)
-  final bool validated;
+  bool validated;
 }
