@@ -41,7 +41,7 @@ class _LabelsWrapState extends State<LabelsWrap> {
     if (widget.panelController != null) {
       widget.panelController!.close();
     }
-    if (widget.clustersUpdateCallback != null) {
+    if (widget.clustersUpdateCallback != null && _switchActive) {
       widget.clustersUpdateCallback!();
     }
   }
@@ -50,7 +50,6 @@ class _LabelsWrapState extends State<LabelsWrap> {
   Widget build(BuildContext context) {
     return ListView(
       controller: widget._scrollController,
-      // mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const SizedBox(
           height: 12.0,
@@ -72,8 +71,7 @@ class _LabelsWrapState extends State<LabelsWrap> {
         ),
         selectedLabelData["label"] != null
             ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
                     "Selected Label: ",
@@ -89,9 +87,11 @@ class _LabelsWrapState extends State<LabelsWrap> {
                   ),
                 ],
               )
-            : const Text(
-                "Select label.",
-                textScaleFactor: 2.00,
+            : const Center(
+                child: Text(
+                  "Select label.",
+                  textScaleFactor: 2.00,
+                ),
               ),
         const SizedBox(
           height: 48.0,
