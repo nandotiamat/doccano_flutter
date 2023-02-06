@@ -1,4 +1,3 @@
-import 'package:hive_flutter/hive_flutter.dart';
 
 class ExampleMetadata {
   ExampleMetadata({

@@ -6,19 +6,18 @@ import 'package:flutter/material.dart';
 class ValidationCard extends StatelessWidget {
   const ValidationCard({
     Key? key,
-    required SpanToValidate? spanToValidate,
-    required this.commentMap,
+    this.commentMap,
     this.inlineSpanList,
-  })  : _spanToValidate = spanToValidate,
-        super(key: key);
+    required this.spanToValidate,
+  }) : super(key: key);
 
-  final SpanToValidate? _spanToValidate;
+  final SpanToValidate spanToValidate;
   final Map<String, dynamic>? commentMap;
   final List<InlineSpan>? inlineSpanList;
 
   @override
   Widget build(BuildContext context) {
-    String? spanLabel = _spanToValidate!.label.text!.toLowerCase();
+    String? spanLabel = spanToValidate.label.text!.toLowerCase();
 
     return Card(
       elevation: 8,
@@ -49,12 +48,12 @@ class ValidationCard extends StatelessWidget {
                         child: Chip(
                           materialTapTargetSize:
                               MaterialTapTargetSize.shrinkWrap,
-                          label: Text(_spanToValidate!.label.text!),
+                          label: Text(spanToValidate.label.text!),
                           backgroundColor: Color(hexStringToInt(
-                              _spanToValidate!.label.backgroundColor!)),
+                              spanToValidate.label.backgroundColor!)),
                           labelStyle: TextStyle(
                               color: Color(hexStringToInt(
-                                  _spanToValidate!.label.textColor!))),
+                                  spanToValidate  .label.textColor!))),
                         ),
                       ),
                     ),

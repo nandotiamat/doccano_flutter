@@ -1,6 +1,7 @@
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/user_data.dart';
 import 'package:doccano_flutter/components/validation_card.dart';
+import 'package:doccano_flutter/constants/logo_animation.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/menu_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
@@ -28,19 +29,24 @@ class ValidationPage extends StatefulWidget {
 }
 
 class _ValidationPageState extends State<ValidationPage> {
-  late Future<ExampleMetadata?>? _future;
+  late Future<Map<String, dynamic>> _future;
   List<Span>? fetchedSpans;
   List<Label>? fetchedLabels;
   List<InlineSpan>? _spans;
+  ExampleMetadata? metaData;
+  late Map<String, dynamic> commentMap;
 
   List<SpanToValidate>? validatedSpans;
 
   late bool endOfCards;
+  late bool allSpansValidate = false;
   List<SpanToValidate>? validatingSpans = [];
   List<Span>? deletingSpans = [];
   List<Span>? ignoringSpans = [];
 
-  Future<ExampleMetadata?>? getData() async {
+  List<ValidationCard?> cards = [];
+
+  Future<Map<String, dynamic>> getData() async {
     if (dotenv.get("ENV") == "development") {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
     }
@@ -53,25 +59,8 @@ class _ValidationPageState extends State<ValidationPage> {
     ExampleMetadata? metaData = await getExampleMetaData(
         Example.fromJson(widget.passedExample.toJson()).id!);
 
-    setState(() {
-      fetchedSpans = spans;
-      fetchedLabels = labels;
-      _spans = [TextSpan(text: widget.passedExample.text)];
-    });
+    List<SpanToValidate>? valSpans;
 
-    return metaData;
-  }
-
-  @override
-  void initState() {
-    endOfCards = false;
-    getValidatedSpan();
-
-    super.initState();
-    _future = getData();
-  }
-
-  void getValidatedSpan() async {
     var boxUsers = await Hive.openBox('UTENTI');
     print(
         'apro la box da validation page allo start -> ${boxUsers.get('Examples')?.examples}');
@@ -80,9 +69,89 @@ class _ValidationPageState extends State<ValidationPage> {
         boxUsers.get('Examples')?.examples;
 
     if (spanMap.containsKey('${widget.passedExample.id}')) {
-      validatedSpans = spanMap["${widget.passedExample.id}"];
+      valSpans = spanMap["${widget.passedExample.id}"];
     } else {
-      validatedSpans = [];
+      valSpans = [];
+    }
+
+    Map<String, dynamic> data = {
+      "fetchedLabels": labels,
+      "fetchedSpans": spans,
+      "fetchedMetaData": metaData,
+      "fetchedValidatedSpans": valSpans
+    };
+
+    return data;
+  }
+
+  @override
+  void initState() {
+    endOfCards = false;
+
+    super.initState();
+    _future = getData().then((data) {
+      setState(() {
+        fetchedSpans = data["fetchedSpans"];
+        fetchedLabels = data["fetchedLabels"];
+        _spans = [TextSpan(text: widget.passedExample.text)];
+        metaData = data["fetchedMetaData"];
+        commentMap = buildComments(metaData);
+        validatedSpans = data["fetchedValidatedSpans"];
+      });
+      buildCards();
+      allSpansValidate = checkNumberSpansValidated();
+      print(allSpansValidate);
+      return data;
+    });
+  }
+
+  bool checkNumberSpansValidated(){
+
+    if (fetchedSpans?.isNotEmpty ?? false) {
+      if(validatedSpans?.isNotEmpty ?? false){
+        if(validatedSpans!.length == fetchedSpans!.length){
+          return true;
+        } else{
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  }
+
+  void buildCards() {
+    for (int i = 0; i < fetchedSpans!.length; i++) {
+      List<InlineSpan> inlineSpanList = buildSpan(fetchedSpans![i]);
+      SpanToValidate spanToValidate = SpanToValidate(
+          span: fetchedSpans![i],
+          label: fetchedLabels!
+              .firstWhere((label) => fetchedSpans![i].label == label.id),
+          validated: false);
+      updateTextSpan(inlineSpanList);
+      if (validatedSpans!.isNotEmpty) {
+        bool isValid = false;
+        for (int j = 0; j < validatedSpans!.length; j++) {
+          if (validatedSpans![j].span.id == spanToValidate.span.id) {
+            isValid = true;
+          }
+        }
+        if (!isValid) {
+          cards.add(ValidationCard(
+            spanToValidate: spanToValidate,
+            inlineSpanList: inlineSpanList,
+            commentMap: commentMap,
+          ));
+        }
+      } else {
+        cards.add(ValidationCard(
+          spanToValidate: spanToValidate,
+          inlineSpanList: inlineSpanList,
+          commentMap: commentMap,
+        ));
+      }
     }
   }
 
@@ -127,6 +196,19 @@ class _ValidationPageState extends State<ValidationPage> {
     return getValidationText(span, temporarySpans);
   }
 
+  Map<String, dynamic> buildComments(ExampleMetadata? metaData) {
+    String commentString = metaData!.comment!;
+    Map<String, dynamic> commentMap = {};
+
+    commentString.split(',').forEach((element) {
+      final parts = element.split(':');
+      commentMap[parts[0].trim()] = parts[1].trim();
+    });
+
+    fixData(commentMap);
+    return commentMap;
+  }
+
   @override
   Widget build(BuildContext context) {
     Example example = widget.passedExample;
@@ -157,80 +239,18 @@ class _ValidationPageState extends State<ValidationPage> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
-                  ExampleMetadata? metaData = snapshot.data;
 
-                  String commentString = metaData!.comment!;
-                  Map<String, dynamic> commentMap = {};
-
-                  commentString.split(',').forEach((element) {
-                    final parts = element.split(':');
-                    commentMap[parts[0].trim()] = parts[1].trim();
-                  });
-
-                  fixData(commentMap);
-
-                  List<ValidationCard?> cards = [];
-                  for (int i = 0; i < fetchedSpans!.length; i++) {
-                    List<InlineSpan> inlineSpanList =
-                        buildSpan(fetchedSpans![i]);
-                    SpanToValidate spanToValidate = SpanToValidate(
-                        span: fetchedSpans![i],
-                        label: fetchedLabels!.firstWhere(
-                            (label) => fetchedSpans![i].label == label.id),
-                        validated: false);
-                    updateTextSpan(inlineSpanList);
-                    if (validatedSpans!.isNotEmpty) {
-                      bool isValid = false;
-                      for (int j = 0; j < validatedSpans!.length; j++) {
-                        if (validatedSpans![j].span.id ==
-                            spanToValidate.span.id) {
-                          isValid = true;
-                          break;
-                        }
-                      }
-                      if (!isValid) {
-                        cards.add(ValidationCard(
-                          spanToValidate: spanToValidate,
-                          inlineSpanList: inlineSpanList,
-                          commentMap: commentMap,
-                        ));
-                      }
-                    } else {
-                      cards.add(ValidationCard(
-                        spanToValidate: spanToValidate,
-                        inlineSpanList: inlineSpanList,
-                        commentMap: commentMap,
-                      ));
-                    }
-                  }
 
                   void swipe(int index, CardSwiperDirection direction) async {
-                    SpanToValidate spanToValidate = SpanToValidate(
-                        span: fetchedSpans![index],
-                        label: fetchedLabels!.firstWhere(
-                            (label) => fetchedSpans![index].label == label.id),
-                        validated: true);
+
+                    SpanToValidate spanToValidate = cards[index]!.spanToValidate;
 
                     if (direction.name == 'right') {
-                      print(
-                          "the card was swiped to the: ${direction.name} with   $index");
-
                       validatingSpans?.add(spanToValidate);
                     }
+
                     if (direction.name == 'left') {
-                      print(
-                          "the card was swiped to the: ${direction.name} $index");
-                      print(widget.passedExample.id!);
-                      print(fetchedSpans![index].id);
-
-                      deletingSpans?.add(fetchedSpans![index]);
-                      //deleteSpan(widget.passedExample.id!, fetchedSpans![index].id);
-                      //debugPrint("Span $index from example ${widget.passedExample.id} was successfully deleted.");
-                      if (widget.passedExample.isConfirmed == true) {
-                        //await unCheckExample(widget.passedExample.id!);
-                      }
-
-                      deletingSpans?.add(fetchedSpans![index]);
+                      deletingSpans?.add(cards[index]!.spanToValidate.span);
                     }
 
                     if (direction.name == 'top') {
@@ -242,447 +262,516 @@ class _ValidationPageState extends State<ValidationPage> {
                     }
                   }
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                          flex: 1,
-                          child: (endOfCards
-                              ? Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
+                  
+                   return SafeArea(
+                     child: allSpansValidate ? Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                       children: [
+                        const Padding(
+                          padding:  EdgeInsets.all(8.0),
+                          child: LogoAnimation(),
+                        ),
+                         Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(50),
+                                      ),
+                                      fixedSize: const Size(250 ,70),
+                                      backgroundColor:
+                                          Colors.lightBlue[400],
+                                ),
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                }, 
+                                child: const Text('ALL SPAN ALREADY VALIDATED',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                            ),
+                              ),
+                            ),
+                          ),
+                       ],
+                     ) :Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Flexible(
+                            flex: 1,
+                            child: (endOfCards
+                                ? Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: SizedBox(
+                                                height: 100,
+                                                child: Card(
+                                                  elevation: 8,
+                                                  color: Colors.red,
+                                                  child: Column(
+                                                    children: [
+                                                      const Padding(
+                                                        padding:
+                                                            EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          'DELETE',
+                                                          style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                                8.0),
+                                                        child: Text(
+                                                          'You are deleting ${deletingSpans?.length} Span',
+                                                          style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 18),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: SizedBox(
+                                                height: 100,
+                                                child: Card(
+                                                  elevation: 8,
+                                                  color: Colors.grey,
+                                                  child: Column(
+                                                    children: [
+                                                      const Padding(
+                                                        padding:
+                                                            EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          'IGNORE',
+                                                          style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                                8.0),
+                                                        child: Text(
+                                                          'You are ignoring ${ignoringSpans?.length} Span',
+                                                          style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 18),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: SizedBox(
+                                                height: 100,
+                                                child: Card(
+                                                  elevation: 8,
+                                                  color: Colors.green,
+                                                  child: Column(
+                                                    children: [
+                                                      const Padding(
+                                                        padding:
+                                                            EdgeInsets.all(8.0),
+                                                        child: Text(
+                                                          'VALIDATE',
+                                                          style: TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets.all(
+                                                                8.0),
+                                                        child: Text(
+                                                          'You are validating ${validatingSpans?.length} Span',
+                                                          style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 18),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: SizedBox(
-                                              height: 100,
-                                              child: Card(
-                                                elevation: 8,
-                                                color: Colors.red,
-                                                child: Column(
-                                                  children: [
-                                                    const Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text(
-                                                        'DELETE',
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Text(
-                                                        'You are deleting ${deletingSpans?.length} Span',
-                                                        style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 18),
-                                                      ),
-                                                    ),
-                                                  ],
+                                            padding:
+                                                const EdgeInsets.only(top: 80.0),
+                                            child: Center(
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(50),
+                                                  ),
+                                                  fixedSize: const Size(150, 70),
+                                                  backgroundColor: Colors.red,
+                                                ),
+                                                onPressed: () {
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              'ANNULLA VALIDAZIONE...'),
+                                                          content:
+                                                              StatefulBuilder(
+                                                            builder: (BuildContext
+                                                                    context,
+                                                                StateSetter
+                                                                    setState) {
+                                                              return const SizedBox(
+                                                                height: 60,
+                                                                child: Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
+                                                                          top:
+                                                                              16.0),
+                                                                  child: Text(
+                                                                    'Stai annullando la validazione...sei sicuro??',
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            18,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .bold),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              child: const Text(
+                                                                  'NO'),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                   
+                                                                Navigator.pop(
+                                                                    context);
+                                                                Navigator.pop(
+                                                                    context);
+                                                                Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                const MenuPage()));
+                                                              },
+                                                              child: const Text(
+                                                                  'OK'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      });
+                                                },
+                                                child: const Text(
+                                                  'ANNULLA',
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 20),
                                                 ),
                                               ),
                                             ),
                                           ),
                                           Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: SizedBox(
-                                              height: 100,
-                                              child: Card(
-                                                elevation: 8,
-                                                color: Colors.grey,
-                                                child: Column(
-                                                  children: [
-                                                    const Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text(
-                                                        'IGNORE',
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Text(
-                                                        'You are ignoring ${ignoringSpans?.length} Span',
-                                                        style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 18),
-                                                      ),
-                                                    ),
-                                                  ],
+                                            padding:
+                                                const EdgeInsets.only(top: 80.0),
+                                            child: Center(
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(50),
+                                                  ),
+                                                  fixedSize: const Size(150, 70),
+                                                  backgroundColor:
+                                                      Colors.green[400],
                                                 ),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: SizedBox(
-                                              height: 100,
-                                              child: Card(
-                                                elevation: 8,
-                                                color: Colors.green,
-                                                child: Column(
-                                                  children: [
-                                                    const Padding(
-                                                      padding:
-                                                          EdgeInsets.all(8.0),
-                                                      child: Text(
-                                                        'VALIDATE',
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 20,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Text(
-                                                        'You are validating ${validatingSpans?.length} Span',
-                                                        style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 18),
-                                                      ),
-                                                    ),
-                                                  ],
+                                                onPressed: () {
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              'CONFERMA VALIDAZIONE...'),
+                                                          content:
+                                                              StatefulBuilder(
+                                                            builder: (BuildContext
+                                                                    context,
+                                                                StateSetter
+                                                                    setState) {
+                                                              return const SizedBox(
+                                                                height: 60,
+                                                                child: Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
+                                                                          top:
+                                                                              16.0),
+                                                                  child: Text(
+                                                                    'Stai sincronizzando la validazione con il webserver...sei sicuro??',
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            18,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .bold),
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              },
+                                                              child: const Text(
+                                                                  'NO'),
+                                                            ),
+                                                            TextButton(
+                                                              //conferma e sync col webserver
+                                                              onPressed:
+                                                                  () async {
+                                                                    if(deletingSpans?.isNotEmpty ?? false){
+                                                                      for(int i = 0; i < deletingSpans!.length; i++){
+                                                                        deleteSpan(widget.passedExample.id!, deletingSpans![i].id);
+                                                                      }
+                                                                      debugPrint("Spans $deletingSpans from example ${widget.passedExample.id}  successfully deleted.");
+                   
+                                                                    }
+                                                                    
+                   
+                                                                validatingSpans
+                                                                    ?.forEach((span) {span.validated =true;
+                                                                });
+                   
+                                                                if (validatedSpans
+                                                                        ?.isNotEmpty ??
+                                                                    false) {
+                                                                  validatingSpans
+                                                                      ?.addAll(
+                                                                          validatedSpans!);
+                                                                }
+                   
+                                                                var boxUsers =
+                                                                    await Hive
+                                                                        .openBox(
+                                                                            'UTENTI');
+                   
+                                                                boxUsers.put(
+                                                                    'Examples',
+                                                                    UserData(
+                                                                        examples: {
+                                                                          widget
+                                                                              .passedExample
+                                                                              .id
+                                                                              .toString(): validatingSpans
+                                                                        }));
+                   
+                                                                print(
+                                                                    'apro la box da validation page sync server-> ${boxUsers.get('Examples').examples}');
+                   
+                                                                if(!mounted) return;
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                   
+                                                                Navigator.pop(
+                                                                    context);
+                                                                Navigator.pop(
+                                                                    context);
+                                                                Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                const MenuPage()));
+                                                              },
+                                                              child: const Text(
+                                                                  'OK'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      });
+                                                },
+                                                child: const Text(
+                                                  'CONFERMA',
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 20),
                                                 ),
                                               ),
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
+                                      
+                                    ],
+                                  )
+                                : CardSwiper(
+                                    isDisabled: false,
+                                    controller: controller,
+                                    cards: cards,
+                                    onSwipe: swipe,
+                                    onEnd: () async {
+                                      setState(() {
+                                        endOfCards = true;
+                                      });
+                                    },
+                                  ))),
+                   
+                        (endOfCards
+                            ? const SizedBox()
+                            : Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 80.0),
-                                          child: Center(
-                                            child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(50),
-                                                ),
-                                                fixedSize: const Size(150, 70),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                              onPressed: () {
-                                                showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return AlertDialog(
-                                                        title: const Text(
-                                                            'ANNULLA VALIDAZIONE...'),
-                                                        content:
-                                                            StatefulBuilder(
-                                                          builder: (BuildContext
-                                                                  context,
-                                                              StateSetter
-                                                                  setState) {
-                                                            return const SizedBox(
-                                                              height: 60,
-                                                              child: Padding(
-                                                                padding: EdgeInsets
-                                                                    .only(
-                                                                        top:
-                                                                            16.0),
-                                                                child: Text(
-                                                                  'Stai annullando la validazione...sei sicuro??',
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                          18,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                            child: const Text(
-                                                                'NO'),
-                                                          ),
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-
-                                                              Navigator.pop(
-                                                                  context);
-                                                              Navigator.pop(
-                                                                  context);
-                                                              Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              const MenuPage()));
-                                                            },
-                                                            child: const Text(
-                                                                'OK'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    });
-                                              },
-                                              child: const Text(
-                                                'ANNULLA',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 20),
-                                              ),
+                   
+                                        CircleAvatar(
+                                          radius: 40,
+                                          backgroundColor: Colors.red,
+                                          child: IconButton(
+                                            onPressed: () {
+                                              (prefs.getBool("DELETE_SPAN")!)
+                                                  ? controller.swipeLeft()
+                                                  : {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: ((context) {
+                                                          return DontAskDialog(
+                                                            checkBoxdontAskValue:
+                                                                checkBoxdontAskValue,
+                                                            swipeController:
+                                                                controller,
+                                                          );
+                                                        }),
+                                                      ),
+                                                    };
+                                            },
+                                            icon: const Icon(
+                                              Icons.close,
+                                              color: Colors.white,
                                             ),
                                           ),
                                         ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 80.0),
-                                          child: Center(
-                                            child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(50),
-                                                ),
-                                                fixedSize: const Size(150, 70),
-                                                backgroundColor:
-                                                    Colors.green[400],
-                                              ),
-                                              onPressed: () {
-                                                showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return AlertDialog(
-                                                        title: const Text(
-                                                            'CONFERMA VALIDAZIONE...'),
-                                                        content:
-                                                            StatefulBuilder(
-                                                          builder: (BuildContext
-                                                                  context,
-                                                              StateSetter
-                                                                  setState) {
-                                                            return const SizedBox(
-                                                              height: 60,
-                                                              child: Padding(
-                                                                padding: EdgeInsets
-                                                                    .only(
-                                                                        top:
-                                                                            16.0),
-                                                                child: Text(
-                                                                  'Stai sincronizzando la validazione con il webserver...sei sicuro??',
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                          18,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold),
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                            child: const Text(
-                                                                'NO'),
-                                                          ),
-                                                          TextButton(
-                                                            //conferma e sync col webserver
-                                                            onPressed:
-                                                                () async {
-                                                              validatingSpans
-                                                                  ?.forEach(
-                                                                      (span) {
-                                                                span.validated =
-                                                                    true;
-                                                              });
-
-                                                              //validatingSpans?.addAll( validatedSpans!);
-
-                                                              var boxUsers =
-                                                                  await Hive
-                                                                      .openBox(
-                                                                          'UTENTI');
-
-                                                              boxUsers.put(
-                                                                  'Examples',
-                                                                  UserData(
-                                                                      examples: {
-                                                                        widget
-                                                                            .passedExample
-                                                                            .id
-                                                                            .toString(): validatingSpans
-                                                                      }));
-
-                                                              // ignore: avoid_print
-                                                              print(
-                                                                  'apro la box da validation page sync server-> ${boxUsers.get('Examples').examples}');
-
-                                                              // ignore: use_build_context_synchronously
-
-                                                              // ignore: use_build_context_synchronously
-
-                                                              // ignore: use_build_context_synchronously
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-
-                                                              // ignore: use_build_context_synchronously
-                                                              Navigator.pop(
-                                                                  context);
-                                                              // ignore: use_build_context_synchronously
-                                                              Navigator.pop(
-                                                                  context);
-                                                              // ignore: use_build_context_synchronously
-                                                              Navigator.push(
-                                                                  context,
-                                                                  MaterialPageRoute(
-                                                                      builder:
-                                                                          (context) =>
-                                                                              const MenuPage()));
-                                                            },
-                                                            child: const Text(
-                                                                'OK'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    });
-                                              },
-                                              child: const Text(
-                                                'CONFERMA',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 20),
-                                              ),
+                   
+                                        CircleAvatar(
+                                          radius: 40,
+                                          backgroundColor: Colors.grey,
+                                          child: IconButton(
+                                            onPressed: () {
+                                              controllerRandomTopBottom(controller);
+                                            },
+                                            icon: const Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                   
+                                        CircleAvatar(
+                                          radius: 40,
+                                          backgroundColor: Colors.green[300],
+                                          child: IconButton(
+                                            onPressed: () {
+                                              controller.swipeRight();
+                                            },
+                                            icon: const Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 30,
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ],
-                                )
-                              : CardSwiper(
-                                  isDisabled: false,
-                                  controller: controller,
-                                  cards: cards,
-                                  onSwipe: swipe,
-                                  onEnd: () async {
-                                    setState(() {
-                                      endOfCards = true;
-                                    });
-                                  },
-                                ))),
-
-                      (endOfCards
-                          ? const SizedBox()
-                          : Expanded(
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  //swipeRightButton(controller),
-
-                                  CircleAvatar(
-                                    radius: 40,
-                                    backgroundColor: Colors.red,
-                                    child: IconButton(
-                                      onPressed: () {
-                                        (prefs.getBool("DELETE_SPAN")!)
-                                            ? controller.swipeLeft()
-                                            : {
-                                                showDialog(
-                                                  context: context,
-                                                  builder: ((context) {
-                                                    return DontAskDialog(
-                                                      checkBoxdontAskValue:
-                                                          checkBoxdontAskValue,
-                                                      swipeController:
-                                                          controller,
-                                                    );
-                                                  }),
+                                    Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Center(
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(50),
+                                                  ),
+                                                  fixedSize: const Size(250 ,70),
+                                                  backgroundColor:
+                                                      Colors.lightBlue[400],
                                                 ),
-                                              };
-                                      },
-                                      icon: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
+                                            onPressed: () async {
+                                              var boxUsers = await Hive.openBox('UTENTI');
+                                              boxUsers.put('Examples',UserData( examples: {widget.passedExample.id.toString(): []}));
+                   
+                                              print('apro la box da validation page sync server-> ${boxUsers.get('Examples').examples}');
+                   
+                                          }, 
+                                          child: const Text('CLEAR VALIDATED SPAN',
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),)),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-
-                                  CircleAvatar(
-                                    radius: 40,
-                                    backgroundColor: Colors.grey,
-                                    child: IconButton(
-                                      onPressed: () {
-                                        controllerRandomTopBottom(controller);
-                                      },
-                                      icon: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-
-                                  CircleAvatar(
-                                    radius: 40,
-                                    backgroundColor: Colors.green[300],
-                                    child: IconButton(
-                                      onPressed: () {
-                                        controller.swipeRight();
-                                      },
-                                      icon: const Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 30,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )),
-                      //CommentWidget(comment: comment),
-                    ],
-                  );
+                                  ],
+                                ),
+                                
+                              )),
+                        //CommentWidget(comment: comment),
+                      ],
+                                     ),
+                   ); 
                 }
+                
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
               }
+
               return const Scaffold(
                 body: Center(
                   child: CircularProgressIndicatorWithText(

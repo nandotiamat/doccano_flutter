@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
