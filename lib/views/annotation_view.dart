@@ -157,7 +157,7 @@ class MyDataSource extends DataTableSource {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                    Homepage(exampleID: examples![index]!.id!),
+                    AnnotationPage(exampleID: examples![index]!.id!),
               ),
             );
           },

@@ -17,15 +17,15 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 //EXTENSIONS
 // import 'package:doccano_flutter/extensions/inline_span_ext.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key, required this.exampleID});
+class AnnotationPage extends StatefulWidget {
+  const AnnotationPage({super.key, required this.exampleID});
   // final Example example;
   final int exampleID;
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<AnnotationPage> createState() => _AnnotationPageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _AnnotationPageState extends State<AnnotationPage> {
   PanelController panelController = PanelController();
   List<SpanCluster> spanClusters = [];
   List<Span>? fetchedSpans;
