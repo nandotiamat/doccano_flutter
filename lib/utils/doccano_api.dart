@@ -33,6 +33,15 @@ Future<List<Label>> getLabels() async {
   return labels;
 }
 
+Future<Example?> getExample(int exampleID) async {
+  var response = await dio.get(
+    "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleID",
+    options: options,
+  );
+  if (response.data != null) return Example.fromJson(response.data);
+  return null;
+}
+
 Future<List<Example?>> getExamples(String confirmed, int offset) async {
   // ARBITRARIO
   Map<String, dynamic> params = {
@@ -146,10 +155,8 @@ Future<bool> deleteSpan(int exampleID, int spanID) async {
 }
 
 Future<void> unCheckExample(int exampleID) async {
-  int projectId = prefs.getInt("PROJECT_ID")!;
-
   var response = await dio.post(
-      "$doccanoWS/v1/projects/$projectId/examples/$exampleID/states",
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleID/states",
       options: options,
       data: {});
   debugPrint(response.statusCode.toString());

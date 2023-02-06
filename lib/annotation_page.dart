@@ -18,8 +18,9 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 // import 'package:doccano_flutter/extensions/inline_span_ext.dart';
 
 class Homepage extends StatefulWidget {
-  const Homepage({super.key, required this.example});
-  final Example example;
+  const Homepage({super.key, required this.exampleID});
+  // final Example example;
+  final int exampleID;
   @override
   State<Homepage> createState() => _HomepageState();
 }
@@ -32,20 +33,23 @@ class _HomepageState extends State<Homepage> {
   List<InlineSpan>? _spans;
   List<InlineSpan>? _vanillaTextSpans;
   late Future<Map<String, dynamic>> _future;
+  late bool isExampleConfirmed;
+  late Example example;
   bool? allowOverlapping = prefs.getBool("allow_overlapping");
-  bool showSelectedLabelAnnotations = true;
+  bool showSelectedLabelAnnotations = false;
   Label? selectedLabel;
 
   Future<Map<String, dynamic>> getData() async {
     List<Label> labels = await getLabels();
-    List<Span>? spans = await getSpans(widget.example.id!);
-
+    List<Span>? spans = await getSpans(widget.exampleID);
+    Example? example = await getExample(widget.exampleID);
     spans!.sort((a, b) => b.length.compareTo(a.length));
     // order Spans by length desc
 
     Map<String, dynamic> data = {
       "fetchedLabels": labels,
-      "fetchedSpans": spans
+      "fetchedSpans": spans,
+      "example": example,
     };
     return data;
   }
@@ -55,11 +59,14 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     _future = getData().then((data) {
       setState(() {
-        _spans = [TextSpan(text: widget.example.text)];
+        _spans = [TextSpan(text: data["example"].text)];
         _vanillaTextSpans = _spans;
         fetchedSpans = data["fetchedSpans"];
         fetchedLabels = data["fetchedLabels"];
+        example = data["example"];
+        isExampleConfirmed = data["example"].isConfirmed!;
       });
+
       createClusters(data["fetchedSpans"], data["fetchedLabels"]);
       buildClusters();
       return data;
@@ -105,9 +112,8 @@ class _HomepageState extends State<Homepage> {
         child: IgnoreSelectable(
           child: Chip(
             onDeleted: () async {
-              bool resourceDeleted =
-                  await deleteSpan(widget.example.id!, span.id)
-                      .then((deleted) => deleted ? true : false);
+              bool resourceDeleted = await deleteSpan(example.id!, span.id)
+                  .then((deleted) => deleted ? true : false);
               if (!resourceDeleted) return;
               setState(() {
                 fetchedSpans.remove(span);
@@ -205,7 +211,7 @@ class _HomepageState extends State<Homepage> {
         }
         return false;
       }).length;
-      createSpan(widget.example.id!, startIndex - numberOfPreviousWidgetSpan,
+      createSpan(example.id!, startIndex - numberOfPreviousWidgetSpan,
               endIndex - numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
           ?.then((spanToBuild) {
         if (spanToBuild != null) {
@@ -234,7 +240,26 @@ class _HomepageState extends State<Homepage> {
 
             return Scaffold(
               appBar: AppBar(
-                title: Text("Annotating Example ${widget.example.id}"),
+                title: Text("Annotating Example ${example.id}"),
+                actions: [
+                  IconButton(
+                    onPressed: () async {
+                      await unCheckExample(example.id!);
+                      setState(() {
+                        isExampleConfirmed = !isExampleConfirmed;
+                      });
+                    },
+                    icon: isExampleConfirmed
+                        ? const Tooltip(
+                            message: "Checked",
+                            child: Icon(Icons.check_circle_outline),
+                          )
+                        : const Tooltip(
+                            message: "Not checked",
+                            child: Icon(Icons.cancel_outlined),
+                          ),
+                  ),
+                ],
               ),
               body: SlidingUpPanel(
                 parallaxEnabled: true,

@@ -156,7 +156,8 @@ class MyDataSource extends DataTableSource {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Homepage(example: examples![index]!),
+                builder: (context) =>
+                    Homepage(exampleID: examples![index]!.id!),
               ),
             );
           },
