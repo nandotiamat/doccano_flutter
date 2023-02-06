@@ -33,6 +33,7 @@ class _HomepageState extends State<Homepage> {
   List<InlineSpan>? _vanillaTextSpans;
   late Future<Map<String, dynamic>> _future;
   bool? allowOverlapping = prefs.getBool("allow_overlapping");
+  bool showSelectedLabelAnnotations = true;
   Label? selectedLabel;
 
   Future<Map<String, dynamic>> getData() async {
@@ -65,9 +66,20 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+  void updateClusters() {
+    createClusters(fetchedSpans!, fetchedLabels!);
+    buildClusters();
+  }
+
   void updateSelectedLabel(Label? selectedLabel) {
     setState(() {
       this.selectedLabel = selectedLabel;
+    });
+  }
+
+  void updateShowSelectedLabelAnnotations(bool value) {
+    setState(() {
+      showSelectedLabelAnnotations = value;
     });
   }
 
@@ -75,7 +87,9 @@ class _HomepageState extends State<Homepage> {
     // creating spanClusters from zero and splitting the annotated text from the example without any annotation.
     spanClusters.clear();
     _spans = _vanillaTextSpans;
-    for (Span span in fetchedSpans) {
+    for (Span span in showSelectedLabelAnnotations && selectedLabel != null
+        ? fetchedSpans.where((span) => span.label == selectedLabel!.id)
+        : fetchedSpans) {
       Label spanLabel = labels.firstWhere((label) => label.id == span.label);
       final startIndex = span.startOffset;
       final endIndex = span.endOffset;
@@ -223,26 +237,14 @@ class _HomepageState extends State<Homepage> {
                 title: Text("Annotating Example ${widget.example.id}"),
               ),
               body: SlidingUpPanel(
-                collapsed: selectedLabel != null
-                    ? Center(
-                        child: Chip(
-                          labelStyle: TextStyle(
-                              color: Color(
-                                  hexStringToInt(selectedLabel!.textColor!))),
-                          backgroundColor: Color(
-                              hexStringToInt(selectedLabel!.backgroundColor!)),
-                          label: Text(selectedLabel!.text!),
-                        ),
-                      )
-                    : const Center(
-                        child: Text(
-                          "Select a label...",
-                          textScaleFactor: 2.00,
-                        ),
-                      ),
-                panel: Center(
-                  child: LabelsWrap(labels, updateSelectedLabel,
-                      panelController: panelController),
+                parallaxEnabled: true,
+                panelBuilder: (sc) => LabelsWrap(
+                  labels,
+                  updateSelectedLabel,
+                  updateShowSelectedLabelAnnotations,
+                  sc,
+                  panelController: panelController,
+                  clustersUpdateCallback: updateClusters,
                 ),
                 body: SingleChildScrollView(
                   child: Selectable(
@@ -285,8 +287,6 @@ class _HomepageState extends State<Homepage> {
                                             newEndIndex > cluster.endIndex));
 
                                 if (overlap) {
-                                  print(
-                                      "CLUSTER OVERLAPPED : ${cluster.startIndex} ${cluster.endIndex} ${newStartIndex} ${newEndIndex} ");
                                   return false;
                                 }
                               }
