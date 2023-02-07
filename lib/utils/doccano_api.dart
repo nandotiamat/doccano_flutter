@@ -7,16 +7,38 @@ import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/models/projects.dart';
 import 'package:flutter/rendering.dart';
 
+Future<Map<String, dynamic>?> getLoggedUserData() async {
+  // probabilmente non serve questa prima parte o forse serve per initSession;
+  String? key = sessionBox.get("key");
+  if (key == null) {
+    //TODO implement throw error
+    return null;
+  }
+  var response =
+      await dio.get("${getDoccanoWebServerPath()!}/v1/me", options: options);
+  return response.data;
+}
+
+Future<Map<String, dynamic>?> getLoggedUserRole() async {
+  var response = await dio.get(
+      "${getDoccanoWebServerPath()!}/v1/projects/${getProjectID()}/my-role",
+      options: options);
+  return response.data;
+}
+
 Future<bool> login(String username, String password) async {
   var dataLogin = {"username": username, "password": password};
   var response = await dio
       .post("${getDoccanoWebServerPath()!}/v1/auth/login/", data: dataLogin)
-      .timeout(const Duration(seconds: 20));
+      .timeout(
+        const Duration(seconds: 10),
+      );
 
   if (response.statusCode == 200) {
     key = response.data["key"];
     options = Options(headers: {'Authorization': 'Token $key'});
     debugPrint("User Logged");
+    sessionBox.put("key", key);
     return true;
   }
 

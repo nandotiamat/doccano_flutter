@@ -1,12 +1,23 @@
 import 'package:doccano_flutter/models/label.dart';
-import 'package:flutter/material.dart';
+import 'package:doccano_flutter/models/span.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
+part '../hive models adapter/span_to_validate.g.dart';
+
+@HiveType(typeId: 1)
 class SpanToValidate {
-  const SpanToValidate({
+  SpanToValidate({
     required this.label,
-    required this.inlineSpanList,
+    required this.span,
+    required this.validated,
   });
 
-  final List<InlineSpan> inlineSpanList;
+  @HiveField(0)
   final Label label;
+
+  @HiveField(1)
+  final Span span;
+
+  @HiveField(2)
+  bool validated;
 }

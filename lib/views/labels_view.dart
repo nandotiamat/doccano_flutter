@@ -3,7 +3,7 @@ import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:flutter/material.dart';
 
-import '../components/circular_progress_indicator_with_text.dart';
+import '../widget/circular_progress_indicator_with_text.dart';
 
 class LabelsView extends StatefulWidget {
   const LabelsView({super.key});

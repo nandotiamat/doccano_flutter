@@ -3,7 +3,7 @@ import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:selectable/selectable.dart';
 //COMPONENTS
-import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
+import 'package:doccano_flutter/widget/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/components/label_text_span.dart';
 import 'package:doccano_flutter/components/labels_wrap.dart';
 //MODELS
