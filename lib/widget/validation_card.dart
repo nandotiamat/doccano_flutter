@@ -1,4 +1,4 @@
-import 'package:doccano_flutter/components/comment_widget.dart';
+import 'package:doccano_flutter/widget/comment_widget.dart';
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:flutter/material.dart';
@@ -23,11 +23,15 @@ class ValidationCard extends StatelessWidget {
       elevation: 8,
       margin: const EdgeInsets.all(12.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -69,8 +73,8 @@ class ValidationCard extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

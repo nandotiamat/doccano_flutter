@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
-part '../hive models/label.g.dart';
+part '../hive models adapter/label.g.dart';
 
 Label? labelFromJson(String str) => Label.fromJson(json.decode(str));
 

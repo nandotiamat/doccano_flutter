@@ -5,7 +5,7 @@ import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'components/circular_progress_indicator_with_text.dart';
+import 'widget/circular_progress_indicator_with_text.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({super.key});

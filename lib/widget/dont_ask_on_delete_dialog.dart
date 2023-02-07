@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 // ignore: must_be_immutable
-class DontAskDialog extends StatelessWidget {
-  DontAskDialog({
+class DontAskOnDeleteDialog extends StatelessWidget {
+  DontAskOnDeleteDialog({
     Key? key,
     required this.checkBoxdontAskValue,
     required this.swipeController,

@@ -2,7 +2,7 @@ import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
-part '../hive models/span_to_validate.g.dart';
+part '../hive models adapter/span_to_validate.g.dart';
 
 @HiveType(typeId: 1)
 class SpanToValidate {

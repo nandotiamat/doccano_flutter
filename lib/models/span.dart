@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
-part '../hive models/span.g.dart';
+part '../hive models adapter/span.g.dart';
 
 Span spanFromJson(String str) => Span.fromJson(json.decode(str));
 

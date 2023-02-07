@@ -1,4 +1,4 @@
-import 'package:doccano_flutter/components/circular_progress_indicator_with_text.dart';
+import 'package:doccano_flutter/widget/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/views/labels_view.dart';
 import 'package:doccano_flutter/models/projects.dart';

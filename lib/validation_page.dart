@@ -1,20 +1,21 @@
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/user_data.dart';
-import 'package:doccano_flutter/components/validation_card.dart';
-import 'package:doccano_flutter/constants/logo_animation.dart';
+import 'package:doccano_flutter/widget/show_clear_validated_span_dialog.dart';
+import 'package:doccano_flutter/widget/validation_card.dart';
+import 'package:doccano_flutter/widget/logo_animation.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/menu_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
-import 'package:doccano_flutter/utils/dont_ask_dialog.dart';
+import 'package:doccano_flutter/widget/dont_ask_on_delete_dialog.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'components/circular_progress_indicator_with_text.dart';
+import 'widget/circular_progress_indicator_with_text.dart';
 
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
@@ -63,7 +64,7 @@ class _ValidationPageState extends State<ValidationPage> {
 
     var boxUsers = await Hive.openBox('UTENTI');
     print(
-        'apro la box da validation page allo start -> ${boxUsers.get('Examples')?.examples}');
+        'apro la box da validation page allo start "${{widget.passedExample.id}}"-> ${boxUsers.get('Examples')?.examples["${widget.passedExample.id}"] ?? []}');
 
     Map<String, List<SpanToValidate>?> spanMap =
         boxUsers.get('Examples')?.examples;
@@ -87,7 +88,6 @@ class _ValidationPageState extends State<ValidationPage> {
   @override
   void initState() {
     endOfCards = false;
-
     super.initState();
     _future = getData().then((data) {
       setState(() {
@@ -100,7 +100,6 @@ class _ValidationPageState extends State<ValidationPage> {
       });
       buildCards();
       allSpansValidate = checkNumberSpansValidated();
-      print(allSpansValidate);
       return data;
     });
   }
@@ -155,9 +154,7 @@ class _ValidationPageState extends State<ValidationPage> {
     }
   }
 
-  int offsetTextToShow = 40;
-
-  List<InlineSpan> getValidationText(Span span, List<InlineSpan> text) {
+  List<InlineSpan> getValidationText(Span span, List<InlineSpan> text,int offsetTextToShow ) {
     List<List<InlineSpan>> result1 = text.splitAtCharacterIndex(
         SplitAtIndex(span.startOffset - offsetTextToShow));
     List<List<InlineSpan>> result2 = result1.last.splitAtCharacterIndex(
@@ -193,7 +190,7 @@ class _ValidationPageState extends State<ValidationPage> {
       if (result2.length > 1) ...result2.last,
     ];
 
-    return getValidationText(span, temporarySpans);
+    return getValidationText(span, temporarySpans, 40);
   }
 
   Map<String, dynamic> buildComments(ExampleMetadata? metaData) {
@@ -207,6 +204,27 @@ class _ValidationPageState extends State<ValidationPage> {
 
     fixData(commentMap);
     return commentMap;
+  }
+
+  void swipe(int index, CardSwiperDirection direction) async {
+
+    SpanToValidate spanToValidate = cards[index]!.spanToValidate;
+
+    if (direction.name == 'right') {
+      validatingSpans?.add(spanToValidate);
+    }
+
+    if (direction.name == 'left') {
+      deletingSpans?.add(cards[index]!.spanToValidate.span);
+    }
+
+    if (direction.name == 'top') {
+      ignoringSpans?.add(fetchedSpans![index]);
+    }
+
+    if (direction.name == 'bottom') {
+      ignoringSpans?.add(fetchedSpans![index]);
+    }
   }
 
   @override
@@ -224,11 +242,8 @@ class _ValidationPageState extends State<ValidationPage> {
             title: Text('Example ID: ${example.id}'),
             leading: BackButton(
               onPressed: () async {
-                // ignore: use_build_context_synchronously
                 Navigator.pop(context);
-                // ignore: use_build_context_synchronously
                 Navigator.pop(context);
-                // ignore: use_build_context_synchronously
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const MenuPage()));
               },
@@ -240,29 +255,6 @@ class _ValidationPageState extends State<ValidationPage> {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
 
-
-                  void swipe(int index, CardSwiperDirection direction) async {
-
-                    SpanToValidate spanToValidate = cards[index]!.spanToValidate;
-
-                    if (direction.name == 'right') {
-                      validatingSpans?.add(spanToValidate);
-                    }
-
-                    if (direction.name == 'left') {
-                      deletingSpans?.add(cards[index]!.spanToValidate.span);
-                    }
-
-                    if (direction.name == 'top') {
-                      ignoringSpans?.add(fetchedSpans![index]);
-                    }
-
-                    if (direction.name == 'bottom') {
-                      ignoringSpans?.add(fetchedSpans![index]);
-                    }
-                  }
-
-                  
                    return SafeArea(
                      child: allSpansValidate ? Column(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -575,65 +567,34 @@ class _ValidationPageState extends State<ValidationPage> {
                                                             ),
                                                             TextButton(
                                                               //conferma e sync col webserver
-                                                              onPressed:
-                                                                  () async {
-                                                                    if(deletingSpans?.isNotEmpty ?? false){
-                                                                      for(int i = 0; i < deletingSpans!.length; i++){
-                                                                        deleteSpan(widget.passedExample.id!, deletingSpans![i].id);
-                                                                      }
-                                                                      debugPrint("Spans $deletingSpans from example ${widget.passedExample.id}  successfully deleted.");
+                                                              onPressed:() async {
+
+                                                                if(deletingSpans?.isNotEmpty ?? false){
+                                                                  for(int i = 0; i < deletingSpans!.length; i++){
+                                                                    deleteSpan(widget.passedExample.id!, deletingSpans![i].id);
+                                                                  }
+                                                                  debugPrint("Spans $deletingSpans from example ${widget.passedExample.id}  successfully deleted.");
+                                                                }
+                                                                  
+                                                                validatingSpans?.forEach((span) {span.validated =true;});
                    
-                                                                    }
-                                                                    
-                   
-                                                                validatingSpans
-                                                                    ?.forEach((span) {span.validated =true;
-                                                                });
-                   
-                                                                if (validatedSpans
-                                                                        ?.isNotEmpty ??
-                                                                    false) {
-                                                                  validatingSpans
-                                                                      ?.addAll(
-                                                                          validatedSpans!);
+                                                                if (validatedSpans?.isNotEmpty ??false) {
+                                                                  validatingSpans?.addAll(validatedSpans!);
                                                                 }
                    
-                                                                var boxUsers =
-                                                                    await Hive
-                                                                        .openBox(
-                                                                            'UTENTI');
+                                                                var boxUsers =await Hive.openBox('UTENTI');
                    
-                                                                boxUsers.put(
-                                                                    'Examples',
-                                                                    UserData(
-                                                                        examples: {
-                                                                          widget
-                                                                              .passedExample
-                                                                              .id
-                                                                              .toString(): validatingSpans
-                                                                        }));
+                                                                boxUsers.put('Examples',UserData(examples: {widget.passedExample.id.toString(): validatingSpans}));
                    
-                                                                print(
-                                                                    'apro la box da validation page sync server-> ${boxUsers.get('Examples').examples}');
+                                                                print('apro la box da validation page sync server-> ${boxUsers.get('Examples').examples}');
                    
                                                                 if(!mounted) return;
-                                                                Navigator.of(
-                                                                        context)
-                                                                    .pop();
-                   
-                                                                Navigator.pop(
-                                                                    context);
-                                                                Navigator.pop(
-                                                                    context);
-                                                                Navigator.push(
-                                                                    context,
-                                                                    MaterialPageRoute(
-                                                                        builder:
-                                                                            (context) =>
-                                                                                const MenuPage()));
+                                                                Navigator.of(context).pop();
+                                                                Navigator.pop(context);
+                                                                Navigator.pop(context);
+                                                                Navigator.push(context,MaterialPageRoute(builder:(context) =>const MenuPage()));
                                                               },
-                                                              child: const Text(
-                                                                  'OK'),
+                                                              child: const Text('OK'),
                                                             ),
                                                           ],
                                                         );
@@ -667,77 +628,94 @@ class _ValidationPageState extends State<ValidationPage> {
                    
                         (endOfCards
                             ? const SizedBox()
-                            : Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            : Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                   
-                                        CircleAvatar(
-                                          radius: 40,
-                                          backgroundColor: Colors.red,
-                                          child: IconButton(
-                                            onPressed: () {
-                                              (prefs.getBool("DELETE_SPAN")!)
-                                                  ? controller.swipeLeft()
-                                                  : {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: ((context) {
-                                                          return DontAskDialog(
-                                                            checkBoxdontAskValue:
-                                                                checkBoxdontAskValue,
-                                                            swipeController:
-                                                                controller,
-                                                          );
-                                                        }),
-                                                      ),
-                                                    };
-                                            },
-                                            icon: const Icon(
-                                              Icons.close,
-                                              color: Colors.white,
-                                            ),
-                                          ),
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor: Colors.red,
+                                      child: IconButton(
+                                                                                    padding: EdgeInsets.zero,
+
+                                        onPressed: () {
+                                          (prefs.getBool("DELETE_SPAN")!)
+                                              ? controller.swipeLeft()
+                                              : {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: ((context) {
+                                                      return DontAskOnDeleteDialog(
+                                                        checkBoxdontAskValue:
+                                                            checkBoxdontAskValue,
+                                                        swipeController:
+                                                            controller,
+                                                      );
+                                                    }),
+                                                  ),
+                                                };
+                                        },
+                                        icon: const Icon(
+                                          Icons.close,
+                                          color: Colors.white,
+                                          size: 40,
                                         ),
-                   
-                                        CircleAvatar(
-                                          radius: 40,
-                                          backgroundColor: Colors.grey,
-                                          child: IconButton(
-                                            onPressed: () {
-                                              controllerRandomTopBottom(controller);
-                                            },
-                                            icon: const Icon(
-                                              Icons.close,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ),
-                   
-                                        CircleAvatar(
-                                          radius: 40,
-                                          backgroundColor: Colors.green[300],
-                                          child: IconButton(
-                                            onPressed: () {
-                                              controller.swipeRight();
-                                            },
-                                            icon: const Icon(
-                                              Icons.check,
-                                              color: Colors.white,
-                                              size: 30,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                    Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Center(
-                                          child: ElevatedButton(
+                   
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor: Colors.grey,
+                                      child: IconButton(
+                                        padding: EdgeInsets.zero,
+                                        onPressed: () {
+                                          controllerRandomTopBottom(controller);
+                                        },
+                                        icon: const Icon(
+                                          
+                                          Icons.swap_vert,
+                                          color: Colors.white,
+                                          size: 40,
+                                        ),
+                                      ),
+                                    ),
+                   
+                                    CircleAvatar(
+                                      radius: 40,
+                                      backgroundColor: Colors.green[300],
+                                      child: IconButton(
+                                        padding: EdgeInsets.zero,
+                                        onPressed: () {
+                                          controller.swipeRight();
+                                        },
+                                        icon: const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 40,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                      child: Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              'Already Validated:  ${validatedSpans?.length ?? 0} of ${fetchedSpans?.length ?? 0}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                          ElevatedButton(
                                             style: ElevatedButton.styleFrom(
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius:
@@ -748,21 +726,18 @@ class _ValidationPageState extends State<ValidationPage> {
                                                       Colors.lightBlue[400],
                                                 ),
                                             onPressed: () async {
-                                              var boxUsers = await Hive.openBox('UTENTI');
-                                              boxUsers.put('Examples',UserData( examples: {widget.passedExample.id.toString(): []}));
+                                              ShowClearValidatedSpanDialog(context, example,);
                    
-                                              print('apro la box da validation page sync server-> ${boxUsers.get('Examples').examples}');
-                   
-                                          }, 
+                                            }, 
                                           child: const Text('CLEAR VALIDATED SPAN',
                                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),)),
-                                        ),
+                                        ],
                                       ),
-                                  ],
-                                ),
-                                
-                              )),
-                        //CommentWidget(comment: comment),
+                                    ),
+                                  ),
+                              ],
+                            )
+                            ),
                       ],
                                      ),
                    ); 
