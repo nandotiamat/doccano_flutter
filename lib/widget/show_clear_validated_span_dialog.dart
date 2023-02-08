@@ -5,7 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 
 import '../models/examples.dart';
 
-Future<void> ShowClearValidatedSpanDialog(  BuildContext context, Example passedExample){
+Future<void> showClearValidatedSpanDialog(  BuildContext context, Example passedExample, bool mounted){
   return showDialog(
     context: context, 
     builder: ((context) {
@@ -42,6 +42,7 @@ Future<void> ShowClearValidatedSpanDialog(  BuildContext context, Example passed
             boxUsers.put('Examples',UserData( examples: {passedExample.id.toString(): []}));
             print('apro la box da validation page clear spans-> ${boxUsers.get('Examples').examples["${passedExample.id}"]}');
 
+            if(!mounted) return;
             Navigator.of(context).pop();
             Navigator.of(context).pop();
             Navigator.push(context,MaterialPageRoute(builder: (context) => const MenuPage()));
