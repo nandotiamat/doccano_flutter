@@ -32,7 +32,7 @@ Future<void> initSession() async {
   if (key != null) {
     options = Options(headers: {'Authorization': 'Token $key'});
     debugPrint("Found key.");
-    var data = await getLoggedUserData().catchError((error) {
+    var data = await getLoggedUserData().catchError((error) { 
       sessionBox.delete("key");
       options = Options();
       return null;
