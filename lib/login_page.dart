@@ -2,7 +2,7 @@ import 'package:doccano_flutter/widget/logo_animation.dart';
 import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
-import 'package:doccano_flutter/widget/show_error_dialog.dart';
+import 'package:doccano_flutter/utils/show_error_dialog.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
