@@ -152,7 +152,7 @@ class MyDataSource extends DataTableSource {
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: Text(
-              examples?[index]!.id.toString() ?? 'we',
+              examples?[index]!.id.toString() ?? '',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -172,11 +172,7 @@ class MyDataSource extends DataTableSource {
         ),
         DataCell(TextButton(
           onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        ValidationPage(passedExample: examples![index]!)));
+            Navigator.push(context,MaterialPageRoute(builder: (context) => ValidationPage(passedExample: examples![index]!)));
           },
           child: const Text(
             'Validate',

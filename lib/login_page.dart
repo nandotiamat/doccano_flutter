@@ -107,6 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                       final username = _username.text;
                       final password = _password.text;
                       final webserverPath = _webServerPath.text;
+                      //print("http://$webserverPath");
                       try {
                         if (await login(username, password)) {
                           if (!mounted) return;
