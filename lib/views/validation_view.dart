@@ -33,15 +33,19 @@ class _ValidationView extends State<ValidationView> {
 
   ScrollController scrollController = ScrollController();
 
+  
+
   @override
   Widget build(BuildContext context) {
     prefs.setBool("DELETE_SPAN", false);
 
-    return Scaffold(
-      appBar: AppBar(
+final appBar = AppBar(
         title: const Text('Dataset Ready for Validation'),
         automaticallyImplyLeading: false,
-      ),
+      );
+
+    return Scaffold(
+      appBar: appBar,
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
@@ -57,58 +61,68 @@ class _ValidationView extends State<ValidationView> {
                 });
               },
               child: LayoutBuilder(builder: (context, constraint) {
-                return SingleChildScrollView(
-                  controller: scrollController,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        child: Center(
-                          child: PaginatedDataTable(
-                            onPageChanged: (value) async {
-                              scrollController.jumpTo(0.0);
+                
+                return (examples?.length ?? 0 ) > 0  ? 
+                 SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    controller: scrollController,
+                    child: PaginatedDataTable(
+                      onPageChanged: (value) async {
+                        scrollController.jumpTo(0.0);
 
-                              List<Example?>? fetchedExamples =
-                                  await getExamples('true', offset);
-                              for (var example in fetchedExamples) {
-                                examples!.add(example);
-                              }
-                              setState(() {
-                                offset += 50;
-                              });
-                            },
-                            dataRowHeight: 90,
-                            columnSpacing: 50,
-                            horizontalMargin: 10,
-                            showCheckboxColumn: false,
-                            rowsPerPage: getRowsForPage(constraint),
-                            sortColumnIndex: 1,
-                            sortAscending: true,
-                            columns: const [
-                              DataColumn(
-                                  label: Text(
-                                'ID',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Text',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              )),
-                              DataColumn(
-                                  label: Text(
-                                'Action',
-                                style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
-                              )),
-                            ],
-                            source: MyDataSource(examples, context),
-                          ),
-                        ),
+                        List<Example?>? fetchedExamples =
+                            await getExamples('true', offset);
+                        for (var example in fetchedExamples) {
+                          examples!.add(example);
+                        }
+                        setState(() {
+                          offset += 50;
+                        });
+                      },
+                      dataRowHeight: 90,
+                      columnSpacing: 30,
+                      horizontalMargin: 10,
+                      showCheckboxColumn: false,
+                      rowsPerPage: getRowsForPage(constraint),
+                      sortColumnIndex: 1,
+                      sortAscending: true,
+                      columns: const [
+                        DataColumn(
+                            label: Text(
+                          'ID',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        )),
+                        DataColumn(
+                            label: Text(
+                          'Text',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        )),
+                        DataColumn(
+                            label: Text(
+                          'Action',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        )),
+                      ],
+                      source: MyDataSource(examples, context),
+                    ),
+                  ),
+                ) : SizedBox(
+                      height: MediaQuery.of(context).size.height - (appBar.preferredSize.height),
+                  child: const Center(
+                    child: SingleChildScrollView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      child: Text('No examples to validate',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20
+                                ),
                       ),
-                    ],
+                    ),
                   ),
                 );
               }),

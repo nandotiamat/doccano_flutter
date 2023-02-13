@@ -58,7 +58,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                             borderRadius: BorderRadius.circular(70),
                             child: ConstrainedBox(
                               constraints: const BoxConstraints(
-                                  minHeight: 100, maxHeight: 200),
+                                  minHeight: 120, maxHeight: 250),
                               child: Padding(
                                 padding: const EdgeInsets.all(12.0),
                                 child: Card(
@@ -83,13 +83,12 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                       children: [
                                         Expanded(
                                           child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                              
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Expanded(
-                                                  flex: 3,
+                                                  flex: 4,
                                                   child: Text(
                                                     projects[index]!
                                                         .name!
@@ -106,13 +105,13 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                       EdgeInsets.only(top: 5),
                                                 ),
                                                 Expanded(
-                                                  flex: 1,
+                                                  flex: 2,
                                                   child: Text(
                                                     'ID: ${projects[index]!.id!}',
                                                     maxLines: 1,
                                                     style: const TextStyle(
                                                         color: Colors.white,
-                                                        fontSize: 16,
+                                                        fontSize: 15,
                                                         fontWeight:
                                                             FontWeight.bold),
                                                   ),
@@ -122,10 +121,10 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                       EdgeInsets.only(top: 5),
                                                 ),
                                                 Expanded(
-                                                  flex: 1,
+                                                  flex: 2,
                                                   child: Text(
                                                     'Type: ${projects[index]!.projectType}',
-                                                    maxLines: 1,
+                                                    
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 15,
@@ -139,9 +138,9 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                 Expanded(
                                                   flex: 2,
                                                   child: Text(
-                                                    projects[index]!
-                                                        .description
-                                                        .toString(),
+                                                    projects[index]!.description.toString(),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 15,
@@ -149,22 +148,20 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                   ),
                                                 ),
                                                 const Padding(
-                                                  padding:
-                                                      EdgeInsets.only(top: 5),
+                                                  padding: EdgeInsets.only(top: 5),
                                                 ),
                                               ]),
                                         ),
                                         Column(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                           children: [
                                             Padding(
-                                              padding: const EdgeInsets.only(
-                                                  top: 16.0),
+                                              padding: const EdgeInsets.only(top: 16.0),
                                               child: TextButton(
                                                 onPressed: () async {
-                                                  await prefs.setInt(
-                                                      'project_id',
-                                                      projects[index]!.id!);
-                                                  // ignore: use_build_context_synchronously
+                                                  await prefs.setInt('project_id', projects[index]!.id!);
+
+                                                  if(!mounted) return;
                                                   Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
@@ -181,8 +178,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                 child: const Text(
                                                   'Select',
                                                   style: TextStyle(
-                                                      color: Color.fromARGB(
-                                                          255, 124, 229, 128),
+                                                      color: Color.fromARGB(255, 124, 229, 128),
                                                       fontSize: 20),
                                                 ),
                                               ),
@@ -194,8 +190,8 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                 onPressed: () async {
                                                   await showDialog(
                                                       context: context,
-                                                      builder: (BuildContext
-                                                          context) {
+                                                      builder: (BuildContext context) {
+
                                                         return AlertDialog(
                                                           title: const Text(
                                                               'Confirm Delete'),
@@ -203,42 +199,33 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                               'Are you sure you want to delete this project'),
                                                           actions: <Widget>[
                                                             TextButton(
-                                                                onPressed:
-                                                                    () async {
-                                                                  await deleteProject(
-                                                                      projects[
-                                                                              index]!
-                                                                          .id!);
-                                                                  // ignore: use_build_context_synchronously
-                                                                  Navigator.pop(
-                                                                      context);
+                                                                onPressed: () async {
+                                                                  await deleteProject(projects[index]!.id!);
+
+                                                                  if(!mounted) return;
+                                                                  Navigator.pop(context);
 
                                                                   setState(() {
-                                                                    _future =
-                                                                        getData();
+                                                                    _future = getData();
                                                                   });
                                                                 },
-                                                                child:
-                                                                    const Text(
-                                                                        'yes')),
+                                                                child: const Text('yes')
+                                                             ),
                                                             TextButton(
-                                                                onPressed:
-                                                                    () async {
-                                                                  Navigator.pop(
-                                                                      context);
+                                                                onPressed: () async {
+                                                                  Navigator.pop(context);
                                                                 },
-                                                                child:
-                                                                    const Text(
-                                                                        'no')),
+                                                                child: const Text('no')
+                                                              ),
                                                           ],
                                                         );
-                                                      });
+                                                      }
+                                                    );
                                                 },
                                                 child: const Text(
                                                   'Delete',
                                                   style: TextStyle(
-                                                      color: Color.fromARGB(
-                                                          255, 237, 56, 43),
+                                                      color: Color.fromARGB(255, 237, 56, 43),
                                                       fontSize: 20),
                                                 ),
                                               ),

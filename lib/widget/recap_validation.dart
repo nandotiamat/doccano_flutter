@@ -341,7 +341,7 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                     'CONFERMA',
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 20),
+                        fontSize: 18),
                   ),
                 ),
               ),

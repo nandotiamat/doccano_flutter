@@ -13,7 +13,7 @@ Future<void> showClearValidatedSpanDialog(  BuildContext context, Example passed
       title: const Text('CLEARING VALIDATED SPAN...'),
       content: 
            SizedBox(
-            height: 150,
+            height: 200,
             child: Column(
               children: const [  
                  Padding(
