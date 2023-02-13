@@ -40,24 +40,77 @@ class _ProfilePageState extends State<ProfilePage> {
       appBar: AppBar(
         title: const Text("profile page"),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            Text(
-              "LoggedUserRole : $loggedUserRole",
-              textScaleFactor: 2.00,
+            Table(
+              children: [
+                TableRow(
+                  children: [
+                    const Text("Username:"),
+                    Text(
+                      loggedUserData?["username"],
+                    )
+                  ],
+                ),
+                TableRow(children: [
+                  const Text("Role:"),
+                  Text(loggedUserRole?["rolename"])
+                ]),
+                TableRow(children: [
+                  const Text("Staff:"),
+                  loggedUserData?["is_staff"]
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        )
+                      : const Icon(
+                          Icons.close,
+                          color: Colors.red,
+                        ),
+                ]),
+                TableRow(children: [
+                  const Text("SuperUser:"),
+                  loggedUserData?["is_superuser"]
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.green,
+                        )
+                      : const Icon(
+                          Icons.close,
+                          color: Colors.red,
+                        ),
+                ]),
+              ],
             ),
-            Text("ID: ${loggedUserData?["id"]}"),
-            Text("username: ${loggedUserData?["username"]}"),
-            Text("is_staff: ${loggedUserData?["is_staff"]}"),
-            Text("is_superuser: ${loggedUserData?["is_superuser"]}"),
             ElevatedButton(
               onPressed: _logout,
-              child: const Text("Logout"),
-            ),
-          ],
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: const Text("Logout"),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      // body: Center(
+      //   child: Column(
+      //     children: [
+      //       Text(
+      //         "LoggedUserRole : $loggedUserRole",
+      //         textScaleFactor: 2.00,
+      //       ),
+      //       Text("ID: ${loggedUserData?["id"]}"),
+      //       Text("username: ${loggedUserData?["username"]}"),
+      //       Text("is_staff: ${loggedUserData?["is_staff"]}"),
+      //       Text("is_superuser: ${loggedUserData?["is_superuser"]}"),
+      //
+      //     ],
+      //   ),
+      // ),
     );
   }
 }
