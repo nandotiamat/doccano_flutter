@@ -109,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
                       final webserverPath = _webServerPath.text;
                       try {
                         await prefs.setString(
-                            "doccano_webserver_path", webserverPath);
+                            "doccano_webserver_path", "http://$webserverPath");
                         if (await login(username, password)) {
                           if (!mounted) return;
                           prefs
@@ -125,7 +125,10 @@ class _LoginPageState extends State<LoginPage> {
                         }
                       } catch (e) {
                         showErrorLoginDialog(
-                            context, e.toString(), 'error occured');
+                          context,
+                          "Error during login",
+                          'Try to change credentials or webserver path.',
+                        );
                       }
                     },
                     style: ButtonStyle(
