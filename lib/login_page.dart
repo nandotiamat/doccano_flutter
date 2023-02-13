@@ -109,6 +109,8 @@ class _LoginPageState extends State<LoginPage> {
                       final webserverPath = _webServerPath.text;
                       //print("http://$webserverPath");
                       try {
+                        await prefs.setString(
+                            "doccano_webserver_path", webserverPath);
                         if (await login(username, password)) {
                           if (!mounted) return;
                           prefs
@@ -123,7 +125,8 @@ class _LoginPageState extends State<LoginPage> {
                                   });
                         }
                       } catch (e) {
-                        showErrorLoginDialog(context, e.toString(), 'error occured');
+                        showErrorLoginDialog(
+                            context, e.toString(), 'error occured');
                       }
                     },
                     style: ButtonStyle(

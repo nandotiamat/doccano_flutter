@@ -1,4 +1,5 @@
 import 'package:doccano_flutter/widget/circular_progress_indicator_with_text.dart';
+import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/views/labels_view.dart';
 import 'package:doccano_flutter/models/projects.dart';
@@ -17,6 +18,7 @@ class _ProjectViewState extends State<ProjectView> {
 
   Future<Project?>? getData() async {
     Project? project = await getProject();
+    await prefs.setBool("allow_overlapping", project!.allowOverlapping!);
     return project;
   }
 
@@ -33,7 +35,6 @@ class _ProjectViewState extends State<ProjectView> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           Project? project = snapshot.data;
-
           return Scaffold(
             appBar: AppBar(
               title: const Text('Welcome to Doccano'),

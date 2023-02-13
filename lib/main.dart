@@ -22,10 +22,9 @@ void main() async {
   Hive.registerAdapter<Span>(SpanAdapter());
 
   await Hive.initFlutter();
-  await Hive.openBox('UTENTI');
-
   await dotenv.load(fileName: ".env");
   await initGlobals();
+  await initSession();
   runApp(const DoccanoFlutter());
 }
 
@@ -47,7 +46,8 @@ class _DoccanoFlutterState extends State<DoccanoFlutter> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Doccano Futter',
-        initialRoute: dotenv.get("ENV") == "development"
+        initialRoute: (dotenv.get("ENV") == "development" ||
+                sessionBox.get("key") != null)
             ? projectsRoute
             : getStartedRoute,
         routes: {

@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/profile_page.dart';
 import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/views/project_view.dart';
 import 'package:doccano_flutter/views/validation_view.dart';
@@ -28,6 +29,7 @@ class _MenuPageState extends State<MenuPage> {
           ProjectView(),
           AnnotationView(),
           ValidationView(),
+          ProfilePage()
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -41,6 +43,8 @@ class _MenuPageState extends State<MenuPage> {
               icon: Icon(Icons.new_label_outlined), label: 'Annotate'),
           BottomNavigationBarItem(
               icon: Icon(Icons.check_circle_outline), label: 'Validate'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle), label: 'Profile'),
         ],
         currentIndex: _currentIndex,
         selectedItemColor: Colors.blue,

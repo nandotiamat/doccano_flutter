@@ -1,5 +1,5 @@
 import 'package:doccano_flutter/widget/circular_progress_indicator_with_text.dart';
-import 'package:doccano_flutter/homepage.dart';
+import 'package:doccano_flutter/annotation_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
@@ -156,7 +156,8 @@ class MyDataSource extends DataTableSource {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => Homepage(example: examples![index]!),
+                builder: (context) =>
+                    AnnotationPage(exampleID: examples![index]!.id!),
               ),
             );
           },

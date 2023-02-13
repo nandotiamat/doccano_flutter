@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/globals.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:selectable/selectable.dart';
@@ -16,32 +17,39 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 //EXTENSIONS
 // import 'package:doccano_flutter/extensions/inline_span_ext.dart';
 
-class Homepage extends StatefulWidget {
-  const Homepage({super.key, required this.example});
-  final Example example;
+class AnnotationPage extends StatefulWidget {
+  const AnnotationPage({super.key, required this.exampleID});
+  // final Example example;
+  final int exampleID;
   @override
-  State<Homepage> createState() => _HomepageState();
+  State<AnnotationPage> createState() => _AnnotationPageState();
 }
 
-class _HomepageState extends State<Homepage> {
+class _AnnotationPageState extends State<AnnotationPage> {
+  PanelController panelController = PanelController();
   List<SpanCluster> spanClusters = [];
   List<Span>? fetchedSpans;
   List<Label>? fetchedLabels;
   List<InlineSpan>? _spans;
   List<InlineSpan>? _vanillaTextSpans;
   late Future<Map<String, dynamic>> _future;
+  late bool isExampleConfirmed;
+  late Example example;
+  bool? allowOverlapping = prefs.getBool("allow_overlapping");
+  bool showSelectedLabelAnnotations = false;
   Label? selectedLabel;
 
   Future<Map<String, dynamic>> getData() async {
     List<Label> labels = await getLabels();
-    List<Span>? spans = await getSpans(widget.example.id!);
-
+    List<Span>? spans = await getSpans(widget.exampleID);
+    Example? example = await getExample(widget.exampleID);
     spans!.sort((a, b) => b.length.compareTo(a.length));
     // order Spans by length desc
 
     Map<String, dynamic> data = {
       "fetchedLabels": labels,
-      "fetchedSpans": spans
+      "fetchedSpans": spans,
+      "example": example,
     };
     return data;
   }
@@ -51,15 +59,23 @@ class _HomepageState extends State<Homepage> {
     super.initState();
     _future = getData().then((data) {
       setState(() {
-        _spans = [TextSpan(text: widget.example.text)];
+        _spans = [TextSpan(text: data["example"].text)];
         _vanillaTextSpans = _spans;
         fetchedSpans = data["fetchedSpans"];
         fetchedLabels = data["fetchedLabels"];
+        example = data["example"];
+        isExampleConfirmed = data["example"].isConfirmed!;
       });
+
       createClusters(data["fetchedSpans"], data["fetchedLabels"]);
       buildClusters();
       return data;
     });
+  }
+
+  void updateClusters() {
+    createClusters(fetchedSpans!, fetchedLabels!);
+    buildClusters();
   }
 
   void updateSelectedLabel(Label? selectedLabel) {
@@ -68,11 +84,19 @@ class _HomepageState extends State<Homepage> {
     });
   }
 
+  void updateShowSelectedLabelAnnotations(bool value) {
+    setState(() {
+      showSelectedLabelAnnotations = value;
+    });
+  }
+
   void createClusters(List<Span> fetchedSpans, List<Label> labels) {
     // creating spanClusters from zero and splitting the annotated text from the example without any annotation.
     spanClusters.clear();
     _spans = _vanillaTextSpans;
-    for (Span span in fetchedSpans) {
+    for (Span span in showSelectedLabelAnnotations && selectedLabel != null
+        ? fetchedSpans.where((span) => span.label == selectedLabel!.id)
+        : fetchedSpans) {
       Label spanLabel = labels.firstWhere((label) => label.id == span.label);
       final startIndex = span.startOffset;
       final endIndex = span.endOffset;
@@ -88,9 +112,8 @@ class _HomepageState extends State<Homepage> {
         child: IgnoreSelectable(
           child: Chip(
             onDeleted: () async {
-              bool resourceDeleted =
-                  await deleteSpan(widget.example.id!, span.id)
-                      .then((deleted) => deleted ? true : false);
+              bool resourceDeleted = await deleteSpan(example.id!, span.id)
+                  .then((deleted) => deleted ? true : false);
               if (!resourceDeleted) return;
               setState(() {
                 fetchedSpans.remove(span);
@@ -188,7 +211,7 @@ class _HomepageState extends State<Homepage> {
         }
         return false;
       }).length;
-      createSpan(widget.example.id!, startIndex - numberOfPreviousWidgetSpan,
+      createSpan(example.id!, startIndex - numberOfPreviousWidgetSpan,
               endIndex - numberOfPreviousWidgetSpan, selectedLabel!.id!, 0)
           ?.then((spanToBuild) {
         if (spanToBuild != null) {
@@ -217,27 +240,37 @@ class _HomepageState extends State<Homepage> {
 
             return Scaffold(
               appBar: AppBar(
-                title: Text("Annotating Example ${widget.example.id}"),
+                title: Text("Annotating Example ${example.id}"),
+                actions: [
+                  IconButton(
+                    onPressed: () async {
+                      await unCheckExample(example.id!);
+                      setState(() {
+                        isExampleConfirmed = !isExampleConfirmed;
+                      });
+                    },
+                    icon: isExampleConfirmed
+                        ? const Tooltip(
+                            message: "Checked",
+                            child: Icon(Icons.check_circle_outline),
+                          )
+                        : const Tooltip(
+                            message: "Not checked",
+                            child: Icon(Icons.cancel_outlined),
+                          ),
+                  ),
+                ],
               ),
               body: SlidingUpPanel(
-                collapsed: selectedLabel != null
-                    ? Center(
-                        child: Chip(
-                          labelStyle: TextStyle(
-                              color: Color(
-                                  hexStringToInt(selectedLabel!.textColor!))),
-                          backgroundColor: Color(
-                              hexStringToInt(selectedLabel!.backgroundColor!)),
-                          label: Text(selectedLabel!.text!),
-                        ),
-                      )
-                    : const Center(
-                        child: Text(
-                          "Select a label...",
-                          textScaleFactor: 2.00,
-                        ),
-                      ),
-                panel: Center(child: LabelsWrap(labels, updateSelectedLabel)),
+                parallaxEnabled: true,
+                panelBuilder: (sc) => LabelsWrap(
+                  labels,
+                  updateSelectedLabel,
+                  updateShowSelectedLabelAnnotations,
+                  sc,
+                  panelController: panelController,
+                  clustersUpdateCallback: updateClusters,
+                ),
                 body: SingleChildScrollView(
                   child: Selectable(
                     popupMenuItems: [
@@ -245,7 +278,48 @@ class _HomepageState extends State<Homepage> {
                       SelectableMenuItem(
                         icon: Icons.add,
                         title: 'Add label',
-                        isEnabled: (controller) => controller!.isTextSelected,
+                        isEnabled: (controller) {
+                          if (!allowOverlapping!) {
+                            final selection = controller?.getSelection();
+                            final startIndex = selection?.startIndex;
+                            final endIndex = selection?.endIndex;
+                            if (selection != null &&
+                                startIndex != null &&
+                                endIndex != null &&
+                                endIndex > startIndex) {
+                              for (SpanCluster cluster in spanClusters) {
+                                int numberOfPreviousWidgetSpan =
+                                    _spans!.where((element) {
+                                  if (element.runtimeType == LabelWidgetSpan) {
+                                    return (element as LabelWidgetSpan)
+                                            .label
+                                            .endOffset <
+                                        startIndex;
+                                  }
+                                  return false;
+                                }).length;
+                                int newStartIndex =
+                                    startIndex - numberOfPreviousWidgetSpan;
+                                int newEndIndex =
+                                    endIndex - numberOfPreviousWidgetSpan;
+
+                                bool overlap =
+                                    ((cluster.startIndex < newStartIndex &&
+                                            newStartIndex < cluster.endIndex) ||
+                                        (cluster.startIndex < newEndIndex &&
+                                            newStartIndex < cluster.endIndex) ||
+                                        (newStartIndex < cluster.startIndex &&
+                                            newEndIndex > cluster.endIndex));
+
+                                if (overlap) {
+                                  return false;
+                                }
+                              }
+                            }
+                          }
+
+                          return controller!.isTextSelected;
+                        },
                         handler: handlerAddSpanController,
                       ),
                     ],
@@ -265,6 +339,11 @@ class _HomepageState extends State<Homepage> {
                     ),
                   ),
                 ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24.0),
+                  topRight: Radius.circular(24.0),
+                ),
+                controller: panelController,
               ),
             );
           }

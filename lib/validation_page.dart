@@ -63,11 +63,16 @@ class _ValidationPageState extends State<ValidationPage> {
     List<SpanToValidate>? valSpans;
 
     var boxUsers = await Hive.openBox('UTENTI');
-    print(
-        'apro la box da validation page allo start "${{widget.passedExample.id}}"-> ${boxUsers.get('Examples')?.examples["${widget.passedExample.id}"] ?? []}');
+    print('apro la box da validation page allo start "${{
+      widget.passedExample.id
+    }}"-> ${boxUsers.get('Examples')?.examples["${widget.passedExample.id}"] ?? []}');
 
-    Map<String, List<SpanToValidate>?> spanMap =
-        boxUsers.get('Examples')?.examples ?? [];
+    Map<String, List<SpanToValidate>?> spanMap;
+    if (boxUsers.get('Examples')?.examples != null) {
+      spanMap = boxUsers.get('Examples')?.examples;
+    } else {
+      spanMap = {"examples": []};
+    }
 
     if (spanMap.containsKey('${widget.passedExample.id}')) {
       valSpans = spanMap["${widget.passedExample.id}"];
@@ -104,13 +109,12 @@ class _ValidationPageState extends State<ValidationPage> {
     });
   }
 
-  bool checkNumberSpansValidated(){
-
+  bool checkNumberSpansValidated() {
     if (fetchedSpans?.isNotEmpty ?? false) {
-      if(validatedSpans?.isNotEmpty ?? false){
-        if(validatedSpans!.length == fetchedSpans!.length){
+      if (validatedSpans?.isNotEmpty ?? false) {
+        if (validatedSpans!.length == fetchedSpans!.length) {
           return true;
-        } else{
+        } else {
           return false;
         }
       } else {
@@ -154,9 +158,9 @@ class _ValidationPageState extends State<ValidationPage> {
     }
   }
 
-  List<InlineSpan> getValidationText(Span span, List<InlineSpan> text,int offsetTextToShow ) {
-
-    if(span.startOffset<offsetTextToShow){
+  List<InlineSpan> getValidationText(
+      Span span, List<InlineSpan> text, int offsetTextToShow) {
+    if (span.startOffset < offsetTextToShow) {
       setState(() {
         spanAtBeginText = true;
       });
@@ -165,9 +169,11 @@ class _ValidationPageState extends State<ValidationPage> {
         spanAtBeginText = false;
       });
     }
-    
-    List<List<InlineSpan>> result1 = text.splitAtCharacterIndex(span.startOffset>offsetTextToShow ? 
-        SplitAtIndex(span.startOffset - offsetTextToShow) : SplitAtIndex(span.startOffset));
+
+    List<List<InlineSpan>> result1 = text.splitAtCharacterIndex(
+        span.startOffset > offsetTextToShow
+            ? SplitAtIndex(span.startOffset - offsetTextToShow)
+            : SplitAtIndex(span.startOffset));
     List<List<InlineSpan>> result2 = result1.last.splitAtCharacterIndex(
         SplitAtIndex(span.endOffset - span.startOffset + 2 * offsetTextToShow));
 
@@ -218,7 +224,6 @@ class _ValidationPageState extends State<ValidationPage> {
   }
 
   void swipe(int index, CardSwiperDirection direction) async {
-
     SpanToValidate spanToValidate = cards[index]!.spanToValidate;
 
     if (direction.name == 'right') {
@@ -265,53 +270,48 @@ class _ValidationPageState extends State<ValidationPage> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
-
-                   return SafeArea(
-                     child: allSpansValidate ? AllSpanValidatedWidget(example: example, mounted: mounted) 
-                     : Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            flex: 1,
-                            child: (endOfCards
-                                ? RecapValidationAndSaveChanges(
-                                    mounted: mounted,
-                                    example: example,
-                                    validatingSpans: validatingSpans,
-                                    ignoringSpans: ignoringSpans,
-                                    deletingSpans: deletingSpans,
-                                    validatedSpans: validatedSpans
-                                  )
-                                    : CardSwiper(
-                                        isDisabled: false,
-                                        controller: controller,
-                                        cards: cards,
-                                        onSwipe: swipe,
-                                        onEnd: () async {
-                                          setState(() {
-                                            endOfCards = true;
-                                          });
-                                        },
-                                      )
-                                )
+                  return SafeArea(
+                    child: allSpansValidate
+                        ? AllSpanValidatedWidget(
+                            example: example, mounted: mounted)
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                  flex: 1,
+                                  child: (endOfCards
+                                      ? RecapValidationAndSaveChanges(
+                                          mounted: mounted,
+                                          example: example,
+                                          validatingSpans: validatingSpans,
+                                          ignoringSpans: ignoringSpans,
+                                          deletingSpans: deletingSpans,
+                                          validatedSpans: validatedSpans)
+                                      : CardSwiper(
+                                          isDisabled: false,
+                                          controller: controller,
+                                          cards: cards,
+                                          onSwipe: swipe,
+                                          onEnd: () async {
+                                            setState(() {
+                                              endOfCards = true;
+                                            });
+                                          },
+                                        ))),
+                              (endOfCards
+                                  ? const SizedBox()
+                                  : ValidationButtonWidget(
+                                      controller: controller,
+                                      checkBoxdontAskValue:
+                                          checkBoxdontAskValue,
+                                      validatedSpans: validatedSpans,
+                                      fetchedSpans: fetchedSpans,
+                                      example: example,
+                                      mounted: mounted)),
+                            ],
                           ),
-                   
-                          (endOfCards
-                              ? const SizedBox()
-                              : ValidationButtonWidget(
-                                  controller: controller,
-                                  checkBoxdontAskValue: checkBoxdontAskValue,
-                                  validatedSpans: validatedSpans,
-                                  fetchedSpans: fetchedSpans,
-                                  example: example,
-                                  mounted: mounted
-                                )
-                          ),
-                        ],
-                                     ),
-                    ); 
+                  );
                 }
-                
               } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
               }
@@ -323,12 +323,7 @@ class _ValidationPageState extends State<ValidationPage> {
                 ),
               );
             },
-          )
-        ),
+          )),
     );
   }
 }
-
-
-
-
