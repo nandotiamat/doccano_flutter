@@ -261,7 +261,7 @@ class _ValidationPageState extends State<ValidationPage> {
                 Navigator.pop(context);
                 Navigator.pop(context);
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const MenuPage()));
+                    MaterialPageRoute(builder: (context) => const MenuPage(passedStackIndex: 2,)));
               },
             ),
           ),

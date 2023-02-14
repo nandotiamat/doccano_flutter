@@ -173,7 +173,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                                 projects[index],
                                                           ),
                                                           builder: (context) =>
-                                                              const MenuPage()));
+                                                              const MenuPage(passedStackIndex: 0,)));
                                                 },
                                                 child: const Text(
                                                   'Select',
@@ -196,7 +196,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                           title: const Text(
                                                               'Confirm Delete'),
                                                           content: const Text(
-                                                              'Are you sure you want to delete this project'),
+                                                              'Are you SURE to delete this project'),
                                                           actions: <Widget>[
                                                             TextButton(
                                                                 onPressed: () async {
@@ -209,13 +209,13 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                                     _future = getData();
                                                                   });
                                                                 },
-                                                                child: const Text('yes')
+                                                                child: const Text('Yes')
                                                              ),
                                                             TextButton(
                                                                 onPressed: () async {
                                                                   Navigator.pop(context);
                                                                 },
-                                                                child: const Text('no')
+                                                                child: const Text('No')
                                                               ),
                                                           ],
                                                         );

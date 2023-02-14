@@ -19,8 +19,7 @@ Future<void> initGlobals() async {
   dio = Dio();
   prefs = await SharedPreferences.getInstance();
   if (dotenv.get("ENV") == "development") {
-    await prefs.setString(
-        "doccano_webserver_path", dotenv.get("DOCCANO_WEBSERVER_PATH"));
+    await prefs.setString("doccano_webserver_path", dotenv.get("DOCCANO_WEBSERVER_PATH"));
   }
   usersBox = await Hive.openBox("users");
   sessionBox = await Hive.openBox("session");

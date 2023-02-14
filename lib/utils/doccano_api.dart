@@ -11,11 +11,9 @@ Future<Map<String, dynamic>?> getLoggedUserData() async {
   // probabilmente non serve questa prima parte o forse serve per initSession;
   String? key = sessionBox.get("key");
   if (key == null) {
-    //TODO implement throw error
     return null;
   }
-  var response =
-      await dio.get("${getDoccanoWebServerPath()!}/v1/me", options: options);
+  var response = await dio.get("${getDoccanoWebServerPath()!}/v1/me", options: options);
   return response.data;
 }
 
@@ -28,14 +26,8 @@ Future<Map<String, dynamic>?> getLoggedUserRole() async {
 
 Future<bool> login(String username, String password) async {
 
-  print(getDoccanoWebServerPath());
-
   var dataLogin = {"username": username, "password": password};
-  var response = await dio
-      .post("${getDoccanoWebServerPath()!}/v1/auth/login/", data: dataLogin)
-      .timeout(
-        const Duration(seconds: 10),
-      );
+  var response = await dio.post("${getDoccanoWebServerPath()!}/v1/auth/login/", data: dataLogin).timeout(const Duration(seconds: 10),);
 
   if (response.statusCode == 200) {
     key = response.data["key"];

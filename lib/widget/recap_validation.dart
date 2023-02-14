@@ -227,7 +227,7 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                                       MaterialPageRoute(
                                           builder:
                                               (context) =>
-                                                  const MenuPage()));
+                                                  const MenuPage(passedStackIndex: 2,)));
                                 },
                                 child: const Text(
                                     'OK'),
@@ -329,7 +329,7 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                                   Navigator.of(context).pop();
                                   Navigator.pop(context);
                                   Navigator.pop(context);
-                                  Navigator.push(context,MaterialPageRoute(builder:(context) =>const MenuPage()));
+                                  Navigator.push(context,MaterialPageRoute(builder:(context) =>const MenuPage(passedStackIndex: 2,)));
                                 },
                                 child: const Text('OK'),
                               ),
