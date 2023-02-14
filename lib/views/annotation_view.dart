@@ -34,7 +34,7 @@ class _AnnotationViewState extends State<AnnotationView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dataset'),
+        title: const Text('Dataset Ready for Annotation'),
         automaticallyImplyLeading: false,
       ),
       body: FutureBuilder(
@@ -50,6 +50,7 @@ class _AnnotationViewState extends State<AnnotationView> {
                   scrollDirection: Axis.vertical,
                   controller: scrollController,
                   child: PaginatedDataTable(
+                    
                     onPageChanged: (value) async {
                       scrollController.jumpTo(0.0);
 

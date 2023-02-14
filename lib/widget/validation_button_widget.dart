@@ -4,6 +4,7 @@ import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:doccano_flutter/widget/dont_ask_on_delete_dialog.dart';
+import 'package:doccano_flutter/widget/nothing_to_clear_dialog.dart';
 import 'package:doccano_flutter/widget/show_clear_validated_span_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -120,15 +121,16 @@ class ValidationButtonWidget extends StatelessWidget {
                             borderRadius:
                                 BorderRadius.circular(50),
                           ),
-                          fixedSize: const Size(250 ,70),
+                          fixedSize: const Size(300 ,70),
                           backgroundColor:
                               Colors.lightBlue[400],
                         ),
                     onPressed: () async {
-                      showClearValidatedSpanDialog(context, example, mounted);
+                      (validatedSpans?.length ?? 0 ) > 0 ? showClearValidatedSpanDialog(context, example, mounted) 
+                      : nothingToClearDialog(context, mounted) ;
                     }, 
                     child: const Text('CLEAR VALIDATED SPAN',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
                                 )
                   ),
                 ],

@@ -27,6 +27,9 @@ Future<Map<String, dynamic>?> getLoggedUserRole() async {
 }
 
 Future<bool> login(String username, String password) async {
+
+  print(getDoccanoWebServerPath());
+
   var dataLogin = {"username": username, "password": password};
   var response = await dio
       .post("${getDoccanoWebServerPath()!}/v1/auth/login/", data: dataLogin)

@@ -40,11 +40,17 @@ class _MenuPageState extends State<MenuPage> {
             label: 'Project',
           ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.new_label_outlined), label: 'Annotate'),
+              icon: Icon(Icons.new_label_outlined), 
+              label: 'Annotate'
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.check_circle_outline), label: 'Validate'),
+              icon: Icon(Icons.check_circle_outline),
+              label: 'Validate'
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle), label: 'Profile'),
+              icon: Icon(Icons.account_circle),
+              label: 'Profile'
+          ),
         ],
         currentIndex: _currentIndex,
         selectedItemColor: Colors.blue,

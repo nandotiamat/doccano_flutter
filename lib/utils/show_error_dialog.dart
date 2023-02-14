@@ -9,8 +9,8 @@ Future<void> showErrorLoginDialog(
     context: context,
     builder: ((context) {
       return AlertDialog(
-        title: Text(title.toUpperCase()),
-        content: Text(text),
+        title: Text('Login Error'),
+        content: SingleChildScrollView(child: Expanded(child: Text(title))),
         actions: [
           TextButton(
             onPressed: () {

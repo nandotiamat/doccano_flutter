@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/error_page.dart';
 import 'package:doccano_flutter/widget/logo_animation.dart';
 import 'package:doccano_flutter/constants/routes.dart';
 import 'package:doccano_flutter/globals.dart';
@@ -107,11 +108,12 @@ class _LoginPageState extends State<LoginPage> {
                       final username = _username.text;
                       final password = _password.text;
                       final webserverPath = _webServerPath.text;
+
                       try {
                         await prefs.setString(
                             "doccano_webserver_path", "http://$webserverPath");
+
                         if (await login(username, password)) {
-                          if (!mounted) return;
                           prefs
                               .setString("doccano_webserver_path",
                                   "http://$webserverPath")

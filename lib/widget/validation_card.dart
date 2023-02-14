@@ -74,7 +74,6 @@ class ValidationCard extends StatelessWidget {
               ],
                         ),
             );
-            
           }
         ),
       ),
