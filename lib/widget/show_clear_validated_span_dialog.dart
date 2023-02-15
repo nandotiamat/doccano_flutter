@@ -45,7 +45,6 @@ Future<void> showClearValidatedSpanDialog(  BuildContext context, Example passed
             if(!mounted) return;
             Navigator.of(context).pop();
             Navigator.of(context).pop();
-            Navigator.push(context,MaterialPageRoute(builder: (context) => const MenuPage(passedStackIndex: 2,)));
           },
           child: const Text('CLEAR'),
         ),

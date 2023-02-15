@@ -1,6 +1,5 @@
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/user_data.dart';
-import 'package:doccano_flutter/menu_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
@@ -214,20 +213,9 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(
-                                          context)
-                                      .pop();
+                                  Navigator.of(context).pop();
 
-                                  Navigator.pop(
-                                      context);
-                                  Navigator.pop(
-                                      context);
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder:
-                                              (context) =>
-                                                  const MenuPage(passedStackIndex: 2,)));
+                                  Navigator.of(context).pop();
                                 },
                                 child: const Text(
                                     'OK'),
@@ -295,9 +283,7 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(
-                                          context)
-                                      .pop();
+                                  Navigator.of(context).pop();
                                 },
                                 child: const Text(
                                     'NO'),
@@ -327,9 +313,7 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
 
                                   if(!mounted) return;
                                   Navigator.of(context).pop();
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
-                                  Navigator.push(context,MaterialPageRoute(builder:(context) =>const MenuPage(passedStackIndex: 2,)));
+                                  Navigator.of(context).pop();
                                 },
                                 child: const Text('OK'),
                               ),

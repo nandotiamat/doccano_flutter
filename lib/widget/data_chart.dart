@@ -39,7 +39,6 @@ class DataChart extends StatelessWidget {
           dataLabelSettings: const DataLabelSettings(isVisible: true),
           enableTooltip: true,
           pointColorMapper: (ChartData data, _) {
-            print(data.category);
             if(fetchedLabels?.isNotEmpty ?? false){
               for ( int i = 0; i < fetchedLabels!.length; i++){
                 if(fetchedLabels?[i].text == data.category){

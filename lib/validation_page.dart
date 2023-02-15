@@ -3,7 +3,6 @@ import 'package:doccano_flutter/widget/all_span_validated.dart';
 import 'package:doccano_flutter/widget/recap_validation.dart';
 import 'package:doccano_flutter/widget/validation_button_widget.dart';
 import 'package:doccano_flutter/widget/validation_card.dart';
-import 'package:doccano_flutter/menu_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/label.dart';
 import 'package:doccano_flutter/models/span.dart';
@@ -46,6 +45,8 @@ class _ValidationPageState extends State<ValidationPage> {
   List<Span>? ignoringSpans = [];
 
   List<ValidationCard?> cards = [];
+
+  int currentIndex = 0;
 
   Future<Map<String, dynamic>> getData() async {
     if (dotenv.get("ENV") == "development") {
@@ -241,6 +242,10 @@ class _ValidationPageState extends State<ValidationPage> {
     if (direction.name == 'bottom') {
       ignoringSpans?.add(fetchedSpans![index]);
     }
+
+    setState(() {
+      currentIndex = index;
+    });
   }
 
   @override
@@ -259,9 +264,6 @@ class _ValidationPageState extends State<ValidationPage> {
             leading: BackButton(
               onPressed: () async {
                 Navigator.pop(context);
-                Navigator.pop(context);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const MenuPage(passedStackIndex: 2,)));
               },
             ),
           ),
@@ -300,14 +302,20 @@ class _ValidationPageState extends State<ValidationPage> {
                                         ))),
                               (endOfCards
                                   ? const SizedBox()
-                                  : ValidationButtonWidget(
-                                      controller: controller,
-                                      checkBoxdontAskValue:
-                                          checkBoxdontAskValue,
-                                      validatedSpans: validatedSpans,
-                                      fetchedSpans: fetchedSpans,
-                                      example: example,
-                                      mounted: mounted)),
+                                  : Column(
+                                    children: [
+                                      Text('$currentIndex of ${cards.length}'),
+                                      ValidationButtonWidget(
+                                        currentIndex: currentIndex,
+                                          controller: controller,
+                                          checkBoxdontAskValue:
+                                              checkBoxdontAskValue,
+                                          validatedSpans: validatedSpans,
+                                          fetchedSpans: fetchedSpans,
+                                          example: example,
+                                          mounted: mounted),
+                                    ],
+                                  )),
                             ],
                           ),
                   );

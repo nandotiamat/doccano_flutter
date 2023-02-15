@@ -1,7 +1,6 @@
 import 'package:doccano_flutter/views/span_distribution_view.dart';
 import 'package:doccano_flutter/widget/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/globals.dart';
-import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/views/labels_view.dart';
 import 'package:doccano_flutter/models/projects.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
@@ -107,28 +106,7 @@ class _ProjectViewState extends State<ProjectView> {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(25.0),
-                            child: ElevatedButton(
-                              
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const AnnotationView(),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  elevation: 3, minimumSize: const Size(250, 70),
-                                  backgroundColor: Colors.lightBlue),
-                              child: const Text(
-                                'View Examples',
-                                style:
-                                    TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
+                          
                           Padding(
                             padding: const EdgeInsets.all(25.0),
                             child: ElevatedButton(
