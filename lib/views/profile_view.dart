@@ -67,114 +67,174 @@ class _ProfileViewState extends State<ProfileView> {
               child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Card(
-                  elevation: 10,
-                  margin: const EdgeInsets.all(30),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              const Text(
-                                'Username ->  ',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '${loggedUserData?['username']}',
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              const Text(
-                                'Role ->  ',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '${loggedUserRole?["rolename"]}',
-                                style: const TextStyle(
-                                  color: Colors.blue,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              const Text(
-                                'Staff -> ',
-                                style:  TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              loggedUserData?["is_staff"]
-                                ? const Icon(
-                                    Icons.check,
-                                    color: Colors.green,
-                                  )
-                                : const Icon(
-                                    Icons.close,
-                                    color: Colors.red,
-                                  )
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              const Text(
-                                'Superuser -> ',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              loggedUserData?['is_superuser'] ? const Icon(
-                                Icons.check,
-                                color: Colors.green,
-                              ) :  const Icon(
-                                      Icons.close,
+                Expanded(
+                  child: Card(
+                    elevation: 10,
+                    margin: const EdgeInsets.all(30),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        children: <Widget>[
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'Username ->  ',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${loggedUserData?['username']}',
+                                    style: const TextStyle(
                                       color: Colors.red,
-                                    )
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 30.0),
-                          child: ElevatedButton(
-                            onPressed: _logout,
-                            child: const SizedBox(
-                              child: Text("Logout"),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                        ),
-                      ],
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'User ID ->  ',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${loggedUserData?['id']}',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'Role ->  ',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${loggedUserRole?["rolename"]}',
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'Role ID ->  ',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${loggedUserRole?["role"]}',
+                                    style: const TextStyle(
+                                      color: Colors.blue,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'Staff -> ',
+                                    style:  TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  loggedUserData?["is_staff"]
+                                    ? const Icon(
+                                        Icons.check,
+                                        color: Colors.green,
+                                      )
+                                    : const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                      )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  const Text(
+                                    'Superuser -> ',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  loggedUserData?['is_superuser'] ? const Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                  ) :  const Icon(
+                                          Icons.close,
+                                          color: Colors.red,
+                                        )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 30.0),
+                              child: ElevatedButton(
+                                onPressed: _logout,
+                                child: const SizedBox(
+                                  child: Text("Logout"),
+                                  ),
+                                ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

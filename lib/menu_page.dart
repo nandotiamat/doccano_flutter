@@ -1,4 +1,4 @@
-import 'package:doccano_flutter/profile_view.dart';
+import 'package:doccano_flutter/views/profile_view.dart';
 import 'package:doccano_flutter/views/annotation_view.dart';
 import 'package:doccano_flutter/views/project_view.dart';
 import 'package:doccano_flutter/views/validation_view.dart';

@@ -47,6 +47,7 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.0.12
   hive_generator: ^2.0.0
+  syncfusion_flutter_charts: ^20.4.50
 
 dev_dependencies:
   flutter_test:

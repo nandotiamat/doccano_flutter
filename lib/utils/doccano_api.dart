@@ -24,6 +24,14 @@ Future<Map<String, dynamic>?> getLoggedUserRole() async {
   return response.data;
 }
 
+Future<Map<String,dynamic>?> getSpanDistribution(String username) async {
+
+  var response = await dio.get("${getDoccanoWebServerPath()!}/v1/projects/${getProjectID()}/metrics/span-distribution", options: options);
+
+  return response.data[username];
+
+}
+
 Future<bool> login(String username, String password) async {
 
   var dataLogin = {"username": username, "password": password};
@@ -178,3 +186,4 @@ Future<void> unCheckExample(int exampleID) async {
       data: {});
   debugPrint(response.statusCode.toString());
 }
+
