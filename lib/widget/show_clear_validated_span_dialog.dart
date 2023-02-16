@@ -1,5 +1,5 @@
 import 'package:doccano_flutter/components/user_data.dart';
-import 'package:doccano_flutter/menu_page.dart';
+import 'package:doccano_flutter/globals.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -37,10 +37,9 @@ Future<void> showClearValidatedSpanDialog(  BuildContext context, Example passed
           onPressed: () async {
             Navigator.of(context).pop();
 
-            var boxUsers = await Hive.openBox('UTENTI');
-
-            boxUsers.put('Examples',UserData( examples: {passedExample.id.toString(): []}));
-            print('apro la box da validation page clear spans-> ${boxUsers.get('Examples').examples["${passedExample.id}"]}');
+            var username = sessionBox.get("username");
+            usersBox.put('$username',UserData( examples: {passedExample.id.toString(): []}));
+            print('apro la box da validation page clear spans-> ${usersBox.get('$username')?.examples["${passedExample.id}"]}');
 
             if(!mounted) return;
             Navigator.of(context).pop();

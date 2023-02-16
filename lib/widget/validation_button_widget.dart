@@ -17,7 +17,7 @@ class ValidationButtonWidget extends StatefulWidget {
     required this.validatedSpans,
     required this.fetchedSpans,
     required this.example,
-    required this.mounted, required this.currentIndex,
+    required this.mounted,
   }) : super(key: key);
 
   final CardSwiperController controller;
@@ -26,8 +26,6 @@ class ValidationButtonWidget extends StatefulWidget {
   final List<Span>? fetchedSpans;
   final Example example;
   final bool mounted;
-
-  final int currentIndex;
 
   @override
   State<ValidationButtonWidget> createState() => _ValidationButtonWidgetState();

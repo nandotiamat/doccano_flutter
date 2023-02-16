@@ -1,4 +1,5 @@
 import 'package:doccano_flutter/components/span_to_validate.dart';
+import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/widget/all_span_validated.dart';
 import 'package:doccano_flutter/widget/recap_validation.dart';
 import 'package:doccano_flutter/widget/validation_button_widget.dart';
@@ -11,7 +12,6 @@ import 'package:doccano_flutter/utils/utilities.dart';
 import 'package:float_column/float_column.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'widget/circular_progress_indicator_with_text.dart';
 
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -46,8 +46,6 @@ class _ValidationPageState extends State<ValidationPage> {
 
   List<ValidationCard?> cards = [];
 
-  int currentIndex = 0;
-
   Future<Map<String, dynamic>> getData() async {
     if (dotenv.get("ENV") == "development") {
       await login(dotenv.get("USERNAME"), dotenv.get("PASSWORD"));
@@ -63,20 +61,23 @@ class _ValidationPageState extends State<ValidationPage> {
 
     List<SpanToValidate>? valSpans;
 
-    var boxUsers = await Hive.openBox('UTENTI');
+    var username = sessionBox.get("username");
+
     print('apro la box da validation page allo start "${{
       widget.passedExample.id
-    }}"-> ${boxUsers.get('Examples')?.examples["${widget.passedExample.id}"] ?? []}');
+    }}"-> ${usersBox.get('$username')?.examples["${widget.passedExample.id}"] ?? []}');
+    print(username);
 
-    Map<String, List<SpanToValidate>?> spanMap;
-    if (boxUsers.get('Examples')?.examples != null) {
-      spanMap = boxUsers.get('Examples')?.examples;
+    Map<String, List<SpanToValidate>?>? spanMap;
+
+    if (usersBox.get('$username')?.examples != null) {
+      spanMap = usersBox.get('$username')?.examples;
     } else {
       spanMap = {"examples": []};
     }
 
-    if (spanMap.containsKey('${widget.passedExample.id}')) {
-      valSpans = spanMap["${widget.passedExample.id}"];
+    if (spanMap?.containsKey('${widget.passedExample.id}') ?? false ) {
+      valSpans = spanMap?["${widget.passedExample.id}"];
     } else {
       valSpans = [];
     }
@@ -243,9 +244,6 @@ class _ValidationPageState extends State<ValidationPage> {
       ignoringSpans?.add(fetchedSpans![index]);
     }
 
-    setState(() {
-      currentIndex = index;
-    });
   }
 
   @override
@@ -302,20 +300,14 @@ class _ValidationPageState extends State<ValidationPage> {
                                         ))),
                               (endOfCards
                                   ? const SizedBox()
-                                  : Column(
-                                    children: [
-                                      Text('$currentIndex of ${cards.length}'),
-                                      ValidationButtonWidget(
-                                        currentIndex: currentIndex,
-                                          controller: controller,
-                                          checkBoxdontAskValue:
-                                              checkBoxdontAskValue,
-                                          validatedSpans: validatedSpans,
-                                          fetchedSpans: fetchedSpans,
-                                          example: example,
-                                          mounted: mounted),
-                                    ],
-                                  )),
+                                  : ValidationButtonWidget(
+                                      controller: controller,
+                                      checkBoxdontAskValue:
+                                          checkBoxdontAskValue,
+                                      validatedSpans: validatedSpans,
+                                      fetchedSpans: fetchedSpans,
+                                      example: example,
+                                      mounted: mounted)),
                             ],
                           ),
                   );

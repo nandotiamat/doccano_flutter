@@ -145,7 +145,7 @@ class _ProjectViewState extends State<ProjectView> {
                               child: const Text(
                                 'View Span Distribution',
                                 style: TextStyle(
-                                    fontSize: 25, fontWeight: FontWeight.bold),
+                                    fontSize: 22, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),

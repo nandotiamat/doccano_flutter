@@ -1,10 +1,10 @@
 import 'package:doccano_flutter/components/span_to_validate.dart';
 import 'package:doccano_flutter/components/user_data.dart';
+import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/models/span.dart';
 import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class RecapValidationAndSaveChanges extends StatelessWidget {
 
@@ -214,7 +214,6 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                               TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop();
-
                                   Navigator.of(context).pop();
                                 },
                                 child: const Text(
@@ -305,11 +304,10 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                                     validatingSpans?.addAll(validatedSpans!);
                                   }
 
-                                  var boxUsers =await Hive.openBox('UTENTI');
+                                  var username = sessionBox.get("username");
+                                  usersBox.put('$username',UserData(examples: {example.id.toString(): validatingSpans}));
 
-                                  boxUsers.put('Examples',UserData(examples: {example.id.toString(): validatingSpans}));
-
-                                  print('apro la box da validation page sync server-> ${boxUsers.get('Examples').examples}');
+                                  print('apro la box da validation page sync server-> ${usersBox.get('$username')?.examples}');
 
                                   if(!mounted) return;
                                   Navigator.of(context).pop();

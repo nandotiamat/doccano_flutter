@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/constants/bottom_navbar_height.dart';
 import 'package:doccano_flutter/widget/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/models/examples.dart';
 import 'package:doccano_flutter/validation_page.dart';
@@ -5,8 +6,6 @@ import 'package:doccano_flutter/utils/doccano_api.dart';
 import 'package:flutter/material.dart';
 
 import '../constants/get_rows_for_page.dart';
-import '../globals.dart';
-
 class ValidationView extends StatefulWidget {
   const ValidationView({super.key});
 
@@ -37,12 +36,12 @@ class _ValidationView extends State<ValidationView> {
 
   @override
   Widget build(BuildContext context) {
-    prefs.setBool("DELETE_SPAN", false);
-
-final appBar = AppBar(
+    
+    final appBar = AppBar(
         title: const Text('Dataset Ready for Validation'),
         automaticallyImplyLeading: false,
       );
+
 
     return Scaffold(
       appBar: appBar,
@@ -111,11 +110,11 @@ final appBar = AppBar(
                       source: MyDataSource(examples, context),
                     ),
                   ),
-                ) : SizedBox(
-                      height: MediaQuery.of(context).size.height - (appBar.preferredSize.height),
-                  child: const Center(
-                    child: SingleChildScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
+                ) : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height - (appBar.preferredSize.height) - bottomNavbarHeigth,
+                    child: const Center(
                       child: Text('No examples to validate',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
