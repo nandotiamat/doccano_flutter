@@ -29,50 +29,53 @@ class ValidationCard extends StatelessWidget {
         child: LayoutBuilder(
           builder: (BuildContext ctx, BoxConstraints constraints) {
             
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: RichText(
-                        textScaleFactor: 2.0,
-                        text: TextSpan(
-                            style: const TextStyle(
-                              color: Colors.black,
-                            ),
-                            children: inlineSpanList),
-                      ),
-                ),
-                SizedBox(
-                  child: Transform(
-                    transform: Matrix4.identity()..scale(1.4, 1.4),
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          right: 32.0, top: 15, bottom: 15),
-                      child: Chip(
-                        materialTapTargetSize:
-                            MaterialTapTargetSize.shrinkWrap,
-                        label: Text(spanToValidate.label.text!),
-                        backgroundColor: Color(hexStringToInt(
-                            spanToValidate.label.backgroundColor!)),
-                        labelStyle: TextStyle(
-                            color: Color(hexStringToInt(
-                                spanToValidate  .label.textColor!))),
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RichText(
+                          textScaleFactor: 2.0,
+                          text: TextSpan(
+                              style: const TextStyle(
+                                color: Colors.black,
+                              ),
+                              children: inlineSpanList),
+                        ),
+                  ),
+                  SizedBox(
+                    child: Transform(
+                      transform: Matrix4.identity()..scale(1.4, 1.4),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            right: 32.0, top: 15, bottom: 15),
+                        child: Chip(
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          label: Text(spanToValidate.label.text!),
+                          backgroundColor: Color(hexStringToInt(
+                              spanToValidate.label.backgroundColor!)),
+                          labelStyle: TextStyle(
+                              color: Color(hexStringToInt(
+                                  spanToValidate  .label.textColor!))),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                commentMap!.containsKey(spanLabel)
-                    ? Flexible(
-                        child: CommentWidget(
-                          commentLabel: commentMap![spanLabel],
-                          commentKey: spanLabel,
-                        ),
-                      )
-                    : const Text(''),
-              ],
-                        ),
+                  commentMap!.containsKey(spanLabel)
+                      ? Flexible(
+                          child: CommentWidget(
+                            commentLabel: commentMap![spanLabel],
+                            commentKey: spanLabel,
+                          ),
+                        )
+                      : const Text(''),
+                ],
+                          ),
+              ),
             );
           }
         ),

@@ -1,22 +1,21 @@
 import 'package:doccano_flutter/components/user_data.dart';
-import 'package:doccano_flutter/menu_page.dart';
+import 'package:doccano_flutter/globals.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import '../models/examples.dart';
 
-Future<void> showClearValidatedSpanDialog(  BuildContext context, Example passedExample, bool mounted){
+Future<void> showClearValidatedSpanDialog(
+    BuildContext context, Example passedExample, bool mounted) {
   return showDialog(
-    context: context, 
-    builder: ((context) {
-      return AlertDialog(
-      title: const Text('CLEARING VALIDATED SPAN...'),
-      content: 
-           SizedBox(
+      context: context,
+      builder: ((context) {
+        return AlertDialog(
+          title: const Text('CLEARING VALIDATED SPAN...'),
+          content: SizedBox(
             height: 200,
             child: Column(
-              children: const [  
-                 Padding(
+              children: const [
+                Padding(
                   padding: EdgeInsets.only(top: 16.0),
                   child: Text(
                     'You are clearing all the validated span for this examples...if you delete them then you will have to validate them all over again...are you SURE??',
@@ -26,32 +25,30 @@ Future<void> showClearValidatedSpanDialog(  BuildContext context, Example passed
               ],
             ),
           ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('NO'),
-        ),
-        TextButton(
-          onPressed: () async {
-            Navigator.of(context).pop();
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('NO'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
 
-            var boxUsers = await Hive.openBox('UTENTI');
+                var username = sessionBox.get("username");
+                usersBox.put('$username',
+                    UserData(examples: {passedExample.id.toString(): []}));
+                debugPrint(
+                    'apro la box da validation page clear spans-> ${usersBox.get('$username')?.examples["${passedExample.id}"]}');
 
-            boxUsers.put('Examples',UserData( examples: {passedExample.id.toString(): []}));
-            print('apro la box da validation page clear spans-> ${boxUsers.get('Examples').examples["${passedExample.id}"]}');
-
-            if(!mounted) return;
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-            Navigator.push(context,MaterialPageRoute(builder: (context) => const MenuPage(passedStackIndex: 2,)));
-          },
-          child: const Text('CLEAR'),
-        ),
-      ],
-        
-      );
-    })
-  );
+                if (!mounted) return;
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: const Text('CLEAR'),
+            ),
+          ],
+        );
+      }));
 }

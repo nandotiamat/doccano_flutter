@@ -1,0 +1,1 @@
+const bottomNavbarHeigth = 92.57142857142857;

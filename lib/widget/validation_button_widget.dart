@@ -9,7 +9,7 @@ import 'package:doccano_flutter/widget/show_clear_validated_span_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
-class ValidationButtonWidget extends StatelessWidget {
+class ValidationButtonWidget extends StatefulWidget {
   const ValidationButtonWidget({
     Key? key,
     required this.controller,
@@ -28,74 +28,81 @@ class ValidationButtonWidget extends StatelessWidget {
   final bool mounted;
 
   @override
+  State<ValidationButtonWidget> createState() => _ValidationButtonWidgetState();
+}
+
+class _ValidationButtonWidgetState extends State<ValidationButtonWidget> {
+
+
+  @override
   Widget build(BuildContext context) {
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Row(
-          mainAxisAlignment:
-              MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.red,
-              child: IconButton(
+            ElevatedButton(
+              onPressed: () {
+                (prefs.getBool("DELETE_SPAN")!)
+                  ? widget.controller.swipeLeft()
+                  : {
+                      showDialog(
+                        context: context,
+                        builder: ((context) {
+                          return DontAskOnDeleteDialog(
+                            checkBoxdontAskValue: widget.checkBoxdontAskValue,
+                            swipeController: widget.controller,
+                          );
+                        }),
+                      ),
+                    };
+              },
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
                 padding: EdgeInsets.zero,
-                onPressed: () {
-                  (prefs.getBool("DELETE_SPAN")!)
-                      ? controller.swipeLeft()
-                      : {
-                          showDialog(
-                            context: context,
-                            builder: ((context) {
-                              return DontAskOnDeleteDialog(
-                                checkBoxdontAskValue:
-                                    checkBoxdontAskValue,
-                                swipeController:
-                                    controller,
-                              );
-                            }),
-                          ),
-                        };
-                },
-                icon: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 40,
-                ),
+                backgroundColor: Colors.red,
+                minimumSize: const Size(120,80)
+              ),
+              child: const Icon(
+                Icons.close,
+                color: Colors.white,
+                size: 40,
               ),
             ),
-                    
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.grey,
-              child: IconButton(
+            ElevatedButton(
+              onPressed: () {
+                controllerRandomTopBottom(widget.controller);
+                
+              },
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
                 padding: EdgeInsets.zero,
-                onPressed: () {
-                  controllerRandomTopBottom(controller);
-                },
-                icon: const Icon(
-                  
-                  Icons.swap_vert,
-                  color: Colors.white,
-                  size: 40,
-                ),
+                backgroundColor: Colors.grey,
+                minimumSize: const Size(120,80)
+              ),
+              child: const Icon(
+                Icons.swap_vert,
+                color: Colors.white,
+                size: 40,
+                
               ),
             ),
-                    
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Colors.green[300],
-              child: IconButton(
+            ElevatedButton(
+              onPressed: () {
+                widget.controller.swipeRight();
+              },
+              style: ElevatedButton.styleFrom(
+                shape: const CircleBorder(),
                 padding: EdgeInsets.zero,
-                onPressed: () {
-                  controller.swipeRight();
-                },
-                icon: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 40,
-                ),
+                backgroundColor: Colors.green[300],
+                minimumSize: const Size(120,80)
+              ),
+              child: const Icon(
+                Icons.check,
+                color: Colors.white,
+                size: 40,
               ),
             ),
           ],
@@ -108,7 +115,7 @@ class ValidationButtonWidget extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      'Already Validated:  ${validatedSpans?.length ?? 0} of ${fetchedSpans?.length ?? 0}',
+                      'Already Validated:  ${widget.validatedSpans?.length ?? 0} of ${widget.fetchedSpans?.length ?? 0}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -126,8 +133,8 @@ class ValidationButtonWidget extends StatelessWidget {
                               Colors.lightBlue[400],
                         ),
                     onPressed: () async {
-                      (validatedSpans?.length ?? 0 ) > 0 ? showClearValidatedSpanDialog(context, example, mounted) 
-                      : nothingToClearDialog(context, mounted) ;
+                      (widget.validatedSpans?.length ?? 0 ) > 0 ? showClearValidatedSpanDialog(context, widget.example, widget.mounted) 
+                      : nothingToClearDialog(context, widget.mounted) ;
                     }, 
                     child: const Text('CLEAR VALIDATED SPAN',
                                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),

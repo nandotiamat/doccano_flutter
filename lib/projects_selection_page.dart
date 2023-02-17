@@ -173,7 +173,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                                                                 projects[index],
                                                           ),
                                                           builder: (context) =>
-                                                              const MenuPage(passedStackIndex: 0,)));
+                                                              const MenuPage()));
                                                 },
                                                 child: const Text(
                                                   'Select',

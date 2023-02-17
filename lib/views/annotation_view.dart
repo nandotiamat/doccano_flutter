@@ -1,3 +1,4 @@
+import 'package:doccano_flutter/constants/bottom_navbar_height.dart';
 import 'package:doccano_flutter/widget/circular_progress_indicator_with_text.dart';
 import 'package:doccano_flutter/annotation_page.dart';
 import 'package:doccano_flutter/models/examples.dart';
@@ -43,11 +44,15 @@ class _AnnotationViewState extends State<AnnotationView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dataset Ready for Annotation'),
+
+    final appBar = AppBar(
+        title: const Text('Dataset Ready for Annnotation'),
         automaticallyImplyLeading: false,
-      ),
+      );
+
+
+    return Scaffold(
+      appBar: appBar,
       body: FutureBuilder(
         future: _future,
         builder: (context, snapshot) {
@@ -55,7 +60,8 @@ class _AnnotationViewState extends State<AnnotationView> {
             List<Example?>? examples = snapshot.data;
 
             return LayoutBuilder(builder: (context, constraint) {
-              return SizedBox(
+              return (examples?.length ?? 0 ) > 0  ? 
+              SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
@@ -103,7 +109,20 @@ class _AnnotationViewState extends State<AnnotationView> {
                     source: MyDataSource(examples, context),
                   ),
                 ),
-              );
+              ) : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height - (appBar.preferredSize.height) - bottomNavbarHeigth,
+                    child: const Center(
+                      child: Text('No examples to annotate',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20
+                                ),
+                      ),
+                    ),
+                  ),
+                );
             });
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
