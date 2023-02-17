@@ -13,7 +13,8 @@ Future<Map<String, dynamic>?> getLoggedUserData() async {
   if (key == null) {
     return null;
   }
-  var response = await dio.get("${getDoccanoWebServerPath()!}/v1/me", options: options);
+  var response =
+      await dio.get("${getDoccanoWebServerPath()!}/v1/me", options: options);
   return response.data;
 }
 
@@ -24,18 +25,21 @@ Future<Map<String, dynamic>?> getLoggedUserRole() async {
   return response.data;
 }
 
-Future<Map<String,dynamic>?> getSpanDistribution(String username) async {
-
-  var response = await dio.get("${getDoccanoWebServerPath()!}/v1/projects/${getProjectID()}/metrics/span-distribution", options: options);
+Future<Map<String, dynamic>?> getSpanDistribution(String username) async {
+  var response = await dio.get(
+      "${getDoccanoWebServerPath()!}/v1/projects/${getProjectID()}/metrics/span-distribution",
+      options: options);
 
   return response.data[username];
-
 }
 
 Future<bool> login(String username, String password) async {
-
   var dataLogin = {"username": username, "password": password};
-  var response = await dio.post("${getDoccanoWebServerPath()!}/v1/auth/login/", data: dataLogin).timeout(const Duration(seconds: 10),);
+  var response = await dio
+      .post("${getDoccanoWebServerPath()!}/v1/auth/login/", data: dataLogin)
+      .timeout(
+        const Duration(seconds: 10),
+      );
 
   if (response.statusCode == 200) {
     key = response.data["key"];
@@ -67,12 +71,14 @@ Future<Example?> getExample(int exampleID) async {
   return null;
 }
 
-Future<List<Example?>> getExamples(String confirmed, int offset) async {
+Future<List<Example?>> getExamples(String confirmed, int offset,
+    {String? annotationApproverRole}) async {
   // ARBITRARIO
   Map<String, dynamic> params = {
     "limit": 50,
     "confirmed": confirmed,
-    "offset": offset
+    "offset": offset,
+    "annotations_approved_by_role__name": annotationApproverRole ?? ''
   };
 
   List<Example>? examples = [];
@@ -186,4 +192,3 @@ Future<void> unCheckExample(int exampleID) async {
       data: {});
   debugPrint(response.statusCode.toString());
 }
-

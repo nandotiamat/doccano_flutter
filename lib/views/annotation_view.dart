@@ -17,7 +17,18 @@ class _AnnotationViewState extends State<AnnotationView> {
   late int offset;
 
   Future<List<Example?>?> getData() async {
-    List<Example?>? examples = await getExamples('', 0);
+    String? roleSearchParameter;
+    String? isConfirmed;
+    var userData = await getLoggedUserRole();
+    String loggedUserRole = "";
+    if (userData != null) {
+      loggedUserRole = userData["rolename"];
+    }
+    if (loggedUserRole == "annotator") {
+      isConfirmed = "false";
+    }
+    List<Example?>? examples = await getExamples(isConfirmed ?? '', 0,
+        annotationApproverRole: roleSearchParameter);
     return examples;
   }
 
@@ -50,7 +61,6 @@ class _AnnotationViewState extends State<AnnotationView> {
                   scrollDirection: Axis.vertical,
                   controller: scrollController,
                   child: PaginatedDataTable(
-                    
                     onPageChanged: (value) async {
                       scrollController.jumpTo(0.0);
 
