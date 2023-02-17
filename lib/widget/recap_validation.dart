@@ -246,7 +246,10 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                                     }
                                     debugPrint(
                                         "Spans $deletingSpans from example ${example.id}  successfully deleted.");
-                                  }
+                                    
+                            
+
+                                  } 
 
                                   validatingSpans?.forEach((span) {
                                     span.validated = true;
@@ -266,6 +269,10 @@ class RecapValidationAndSaveChanges extends StatelessWidget {
                                   debugPrint(
                                       'apro la box da validation page sync server-> ${usersBox.get('$username')?.examples}');
 
+                                  if(ignoringSpans?.isEmpty ?? false){
+                                      await doubleToggleExample(example.id!);
+                                    }
+                                    
                                   if (!mounted) return;
                                   Navigator.of(context).pop();
                                   Navigator.of(context).pop();

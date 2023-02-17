@@ -1,4 +1,5 @@
 import 'package:doccano_flutter/components/span_to_validate.dart';
+import 'package:doccano_flutter/components/user_data.dart';
 import 'package:doccano_flutter/globals.dart';
 import 'package:doccano_flutter/widget/all_span_validated.dart';
 import 'package:doccano_flutter/widget/recap_validation.dart';
@@ -63,10 +64,6 @@ class _ValidationPageState extends State<ValidationPage> {
 
     var username = sessionBox.get("username");
 
-    debugPrint('apro la box da validation page allo start "${{
-      widget.passedExample.id
-    }}"-> ${usersBox.get('$username')?.examples["${widget.passedExample.id}"] ?? []}');
-
     Map<String, List<SpanToValidate>?>? spanMap;
 
     if (usersBox.get('$username')?.examples != null) {
@@ -79,7 +76,12 @@ class _ValidationPageState extends State<ValidationPage> {
       valSpans = spanMap?["${widget.passedExample.id}"];
     } else {
       valSpans = [];
+      usersBox.put('$username',UserData(examples: {widget.passedExample.id.toString(): []}));
     }
+
+     debugPrint('apro la box da validation page allo start "${{
+      widget.passedExample.id
+    }}"-> ${usersBox.get('$username')?.examples["${widget.passedExample.id}"] ?? []}');
 
     Map<String, dynamic> data = {
       "fetchedLabels": labels,
@@ -215,10 +217,15 @@ class _ValidationPageState extends State<ValidationPage> {
     String commentString = metaData!.comment!;
     Map<String, dynamic> commentMap = {};
 
-    commentString.split(',').forEach((element) {
-      final parts = element.split(':');
-      commentMap[parts[0].trim()] = parts[1].trim();
-    });
+      RegExp regex = RegExp(r'([^:,]+):([^,]+)');
+  Iterable<Match> matches = regex.allMatches(commentString);
+
+  for (Match match in matches) {
+    String key = match.group(1)!.trim();
+    String value = match.group(2)!.trim();
+
+    commentMap[key] = value;
+  }
 
     fixDataComment(commentMap);
     return commentMap;
@@ -266,8 +273,9 @@ class _ValidationPageState extends State<ValidationPage> {
           body: FutureBuilder(
             future: _future,
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
+              
                 if (snapshot.hasData) {
+
                   return SafeArea(
                     child: allSpansValidate
                         ? AllSpanValidatedWidget(
@@ -309,10 +317,9 @@ class _ValidationPageState extends State<ValidationPage> {
                             ],
                           ),
                   );
-                }
-              } else if (snapshot.hasError) {
+                } else if (snapshot.hasError) {
                 return Text("${snapshot.error}");
-              }
+                }
 
               return const Scaffold(
                 body: Center(

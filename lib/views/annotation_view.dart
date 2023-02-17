@@ -59,7 +59,15 @@ class _AnnotationViewState extends State<AnnotationView> {
           if (snapshot.hasData) {
             List<Example?>? examples = snapshot.data;
 
-            return LayoutBuilder(builder: (context, constraint) {
+            return RefreshIndicator(
+              onRefresh: () {
+                return Future.delayed(const Duration(seconds: 1), () {
+                  setState(() {
+                    _future = getData();
+                  });
+                });
+              },
+            child: LayoutBuilder(builder: (context, constraint) {
               return (examples?.length ?? 0 ) > 0  ? 
               SizedBox(
                 width: MediaQuery.of(context).size.width,
@@ -123,7 +131,9 @@ class _AnnotationViewState extends State<AnnotationView> {
                     ),
                   ),
                 );
-            });
+            })
+            )
+          ;
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
           }

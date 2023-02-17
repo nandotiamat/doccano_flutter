@@ -38,9 +38,15 @@ class _ValidationView extends State<ValidationView> {
 
   @override
   void initState() {
-    super.initState();
-    _future = getData();
+    _future = getData().then((examples) {
+      setState(() {
+        
+      });
+      return examples;
+    })
+    ;
     offset = 50;
+    super.initState();
   }
 
   ScrollController scrollController = ScrollController();
@@ -140,7 +146,8 @@ class _ValidationView extends State<ValidationView> {
             );
           } else if (snapshot.hasError) {
             return Text("${snapshot.error}");
-          }
+            }
+            
           return const Scaffold(
             body: Center(
               child: CircularProgressIndicatorWithText(

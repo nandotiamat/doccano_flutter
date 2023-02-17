@@ -192,3 +192,18 @@ Future<void> unCheckExample(int exampleID) async {
       data: {});
   debugPrint(response.statusCode.toString());
 }
+
+Future<void> doubleToggleExample(int exampleID) async {
+  var response1 = await dio.post(
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleID/states",
+      options: options,
+      data: {});
+  var response2 = await dio.post(
+      "${getDoccanoWebServerPath()}/v1/projects/${getProjectID()}/examples/$exampleID/states",
+      options: options,
+      data: {});
+
+  debugPrint(response1.statusCode.toString());
+  debugPrint(response2.statusCode.toString());
+
+}
