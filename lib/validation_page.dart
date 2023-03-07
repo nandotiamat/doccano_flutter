@@ -214,7 +214,7 @@ class _ValidationPageState extends State<ValidationPage> {
   }
 
   Map<String, dynamic> buildComments(ExampleMetadata? metaData) {
-    String commentString = metaData!.comment!;
+    String commentString = metaData?.comment?? '';
     Map<String, dynamic> commentMap = {};
 
       RegExp regex = RegExp(r'([^:,]+):([^,]+)');

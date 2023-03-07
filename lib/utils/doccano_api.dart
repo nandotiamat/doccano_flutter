@@ -8,7 +8,6 @@ import 'package:doccano_flutter/models/projects.dart';
 import 'package:flutter/rendering.dart';
 
 Future<Map<String, dynamic>?> getLoggedUserData() async {
-  // probabilmente non serve questa prima parte o forse serve per initSession;
   String? key = sessionBox.get("key");
   if (key == null) {
     return null;
